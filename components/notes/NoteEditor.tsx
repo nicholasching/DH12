@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent, ReactNodeViewRenderer, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect } from "react";
+import { useEffect, forwardRef, useImperativeHandle } from "react";
 import { Id } from "convex/values";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { ThreadMark } from "./extensions/ThreadMark";
@@ -16,6 +16,10 @@ import { api } from "@/convex/_generated/api";
 
 const lowlight = createLowlight(common);
 
+export interface NoteEditorHandle {
+  removeThreadMark: (threadId: string) => void;
+}
+
 interface NoteEditorProps {
   initialContent: any;
   noteId?: Id<"notes">;
@@ -24,13 +28,13 @@ interface NoteEditorProps {
   editable?: boolean;
 }
 
-export function NoteEditor({
+export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
   initialContent,
   noteId,
   onChange,
   onThreadSelect,
   editable = true,
-}: NoteEditorProps) {
+}, ref) => {
   const { user } = useUser();
   const createThread = useMutation(api.threads.create);
 
@@ -65,10 +69,7 @@ export function NoteEditor({
       },
       handleClick: (view, pos, event) => {
         const { state } = view;
-        const node = state.doc.nodeAt(pos);
-        // This is tricky because marks are on ranges, not single nodes exactly like this.
-        // Better way: Check active marks at position.
-        // Or simpler: The Mark renders a span with data-thread-id.
+        // Check active marks at position
         const target = event.target as HTMLElement;
         const threadId = target.getAttribute('data-thread-id');
         if (threadId) {
@@ -79,6 +80,27 @@ export function NoteEditor({
       },
     },
   });
+
+  useImperativeHandle(ref, () => ({
+    removeThreadMark: (threadId: string) => {
+      if (!editor) return;
+      
+      // Iterate through the document to find marks with this threadId
+      editor.state.doc.descendants((node, pos) => {
+        const hasMark = node.marks.find(
+          m => m.type.name === 'thread' && m.attrs.threadId === threadId
+        );
+        
+        if (hasMark) {
+          // Remove mark
+          editor.chain()
+            .setTextSelection({ from: pos, to: pos + node.nodeSize })
+            .unsetThread()
+            .run();
+        }
+      });
+    }
+  }));
 
   const addDrawing = () => {
     if (editor && noteId) {
@@ -184,4 +206,6 @@ export function NoteEditor({
       <EditorContent editor={editor} />
     </div>
   );
-}
+});
+
+NoteEditor.displayName = "NoteEditor";

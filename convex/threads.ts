@@ -61,3 +61,10 @@ export const addMessage = mutation({
     });
   },
 });
+
+export const deleteThread = mutation({
+  args: { threadId: v.id("threads") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.threadId);
+  },
+});

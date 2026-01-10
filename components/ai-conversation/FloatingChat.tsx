@@ -5,18 +5,20 @@ import { useState, useEffect, useRef } from "react";
 import { Id } from "convex/values";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { X, Send, MessageSquare } from "lucide-react";
+import { X, Send, MessageSquare, Trash2 } from "lucide-react";
 
 interface FloatingChatProps {
   threadId: Id<"threads">;
   noteId: Id<"notes">; // For context
   onClose: () => void;
+  onThreadDelete?: (threadId: string) => void;
 }
 
-export function FloatingChat({ threadId, noteId, onClose }: FloatingChatProps) {
+export function FloatingChat({ threadId, noteId, onClose, onThreadDelete }: FloatingChatProps) {
   const thread = useQuery(api.threads.get, { threadId });
   const note = useQuery(api.notes.get, { noteId });
   const addMessage = useMutation(api.threads.addMessage);
+  const deleteThread = useMutation(api.threads.deleteThread);
   const chatAction = useAction(api.ai.chat);
   
   const [input, setInput] = useState("");
@@ -77,6 +79,14 @@ export function FloatingChat({ threadId, noteId, onClose }: FloatingChatProps) {
     }
   };
 
+  const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete this thread?")) {
+      await deleteThread({ threadId });
+      onThreadDelete?.(threadId);
+      onClose();
+    }
+  };
+
   if (!thread) return null;
 
   return (
@@ -88,12 +98,21 @@ export function FloatingChat({ threadId, noteId, onClose }: FloatingChatProps) {
             <MessageSquare size={16} />
             <span>AI Thread</span>
           </div>
-          <button 
-            onClick={onClose}
-            className="text-blue-900 hover:bg-blue-100 rounded p-1"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex gap-1">
+            <button 
+              onClick={handleDelete}
+              className="text-red-500 hover:bg-red-100 rounded p-1"
+              title="Delete Thread"
+            >
+              <Trash2 size={16} />
+            </button>
+            <button 
+              onClick={onClose}
+              className="text-blue-900 hover:bg-blue-100 rounded p-1"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Content Preview */}

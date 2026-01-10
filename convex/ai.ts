@@ -32,7 +32,10 @@ export const chat = action({
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     // Construct the prompt with context
-    let systemPrompt = "You are a helpful AI assistant for students taking notes. Answer the student's question concisely and accurately.";
+    let systemPrompt = "You are a helpful AI assistant for students taking notes. Answer the student's question concisely and accurately.\n\n" +
+      "Use the provided Document Context and Specific Selection to tailor your answer to the student's specific material.\n" +
+      "However, if the context does not contain the answer, you MUST use your own general knowledge to answer the question comprehensively. " +
+      "Do NOT refuse to answer just because the information is missing from the notes.";
     
     if (args.documentContext) {
       systemPrompt += `\n\nDocument Context:\n${args.documentContext}`;
