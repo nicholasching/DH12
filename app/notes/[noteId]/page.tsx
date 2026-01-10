@@ -170,8 +170,8 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
         </div>
 
         {/* Right Column - Note Editor */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">
-          <div className="border-b border-gray-300 px-8 py-4 bg-white shrink-0">
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-white min-w-0">
+          <div className="border-b border-gray-300 px-4 sm:px-8 py-4 bg-white shrink-0">
             <div className="text-sm text-gray-500 mb-1">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
@@ -193,7 +193,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="max-w-4xl mx-auto py-8 px-8 min-h-full">
+            <div className="w-full max-w-5xl mx-auto py-8 px-8 min-h-full">
               <NoteEditor 
                 ref={editorRef}
                 initialContent={note.content} 
