@@ -19,6 +19,12 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
   const [activeThreadId, setActiveThreadId] = useState<Id<"threads"> | null>(null);
   const [selectedNotebookId, setSelectedNotebookId] = useState<Id<"notebooks"> | null>(null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [isNotebookCollapsed, setIsNotebookCollapsed] = useState(false);
+  const [isPagesCollapsed, setIsPagesCollapsed] = useState(false);
+  const [notebookWidth, setNotebookWidth] = useState(256); // 64 * 4 = 256px default
+  const [pagesWidth, setPagesWidth] = useState(320); // 80 * 4 = 320px default
+  const [isResizingNotebook, setIsResizingNotebook] = useState(false);
+  const [isResizingPages, setIsResizingPages] = useState(false);
   const editorRef = useRef<NoteEditorHandle>(null);
 
   // Get notebook to find which folder contains this note
@@ -83,6 +89,39 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
     setSelectedFolderId(folderId);
   };
 
+  // Resize handlers
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isResizingNotebook) {
+        const newWidth = Math.max(200, Math.min(600, e.clientX));
+        setNotebookWidth(newWidth);
+      } else if (isResizingPages) {
+        const startX = notebookWidth + (isNotebookCollapsed ? 48 : 0);
+        const newWidth = Math.max(200, Math.min(600, e.clientX - startX));
+        setPagesWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizingNotebook(false);
+      setIsResizingPages(false);
+    };
+
+    if (isResizingNotebook || isResizingPages) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizingNotebook, isResizingPages, notebookWidth, isNotebookCollapsed]);
+
   if (note === undefined) return <div className="h-screen flex items-center justify-center">Loading...</div>;
   if (note === null) return <div className="h-screen flex items-center justify-center">Note not found</div>;
 
@@ -94,19 +133,41 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar - Notebooks */}
-        <NotebookSidebar
-          selectedNotebookId={selectedNotebookId}
-          selectedFolderId={selectedFolderId}
-          onNotebookSelect={handleNotebookSelect}
-          onFolderSelect={handleFolderSelect}
-        />
+        <div style={{ width: isNotebookCollapsed ? 48 : notebookWidth }} className="relative">
+          <NotebookSidebar
+            selectedNotebookId={selectedNotebookId}
+            selectedFolderId={selectedFolderId}
+            onNotebookSelect={handleNotebookSelect}
+            onFolderSelect={handleFolderSelect}
+            isCollapsed={isNotebookCollapsed}
+            onToggleCollapse={() => setIsNotebookCollapsed(!isNotebookCollapsed)}
+          />
+          {!isNotebookCollapsed && (
+            <div
+              onMouseDown={() => setIsResizingNotebook(true)}
+              className="absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors z-20"
+              style={{ cursor: 'col-resize' }}
+            />
+          )}
+        </div>
 
         {/* Middle Column - Pages List */}
-        <PagesList
-          notebookId={selectedNotebookId}
-          folderId={selectedFolderId}
-          activeNoteId={noteId}
-        />
+        <div style={{ width: isPagesCollapsed ? 48 : pagesWidth }} className="relative">
+          <PagesList
+            notebookId={selectedNotebookId}
+            folderId={selectedFolderId}
+            activeNoteId={noteId}
+            isCollapsed={isPagesCollapsed}
+            onToggleCollapse={() => setIsPagesCollapsed(!isPagesCollapsed)}
+          />
+          {!isPagesCollapsed && (
+            <div
+              onMouseDown={() => setIsResizingPages(true)}
+              className="absolute right-0 top-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors z-20"
+              style={{ cursor: 'col-resize' }}
+            />
+          )}
+        </div>
 
         {/* Right Column - Note Editor */}
         <div className="flex-1 flex flex-col h-full overflow-hidden bg-white">

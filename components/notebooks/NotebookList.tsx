@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 
 export function NotebookList() {
   const { user } = useUser();
@@ -23,7 +23,7 @@ export function NotebookList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {notebooks.length === 0 ? (
-        <div className="col-span-full text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed">
+        <div className="col-span-full text-center py-12 text-black bg-white rounded-lg border border-dashed">
           No notebooks yet. Create one to get started!
         </div>
       ) : (
@@ -65,8 +65,8 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
         className="p-4 cursor-pointer flex justify-between items-center"
         onClick={onToggle}
       >
-        <h3 className="font-semibold text-lg">{notebook.title}</h3>
-        <span className="text-sm text-gray-500">
+        <h3 className="font-semibold text-lg text-black">{notebook.title}</h3>
+        <span className="text-sm text-black">
           {Object.keys(notebook.structure?.folders || {}).length} folders
         </span>
       </div>
@@ -74,7 +74,7 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
       {isExpanded && (
         <div className="p-4 border-t border-gray-200 bg-gray-100 rounded-b-lg">
           <div className="flex justify-between items-center mb-3">
-            <h4 className="font-medium text-sm text-gray-800">Folders</h4>
+            <h4 className="font-medium text-sm text-black">Folders</h4>
             <button 
               onClick={(e) => { e.stopPropagation(); setIsAddingFolder(true); }}
               className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-medium border border-blue-200"
@@ -108,7 +108,7 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
               />
             ))}
             {Object.keys(notebook.structure?.folders || {}).length === 0 && !isAddingFolder && (
-              <p className="text-sm text-gray-500 italic">No folders yet</p>
+              <p className="text-sm text-black italic">No folders yet</p>
             )}
           </div>
         </div>
@@ -146,7 +146,7 @@ function FolderItem({ folderId, folder, notebookId }: { folderId: string, folder
   return (
     <div className="pl-2 border-l-2 border-gray-300">
       <div className="flex justify-between items-center group py-1">
-        <span className="text-sm font-medium text-gray-800">{folder.title}</span>
+        <span className="text-sm font-medium text-black">{folder.title}</span>
         <button 
           onClick={handleCreateNote}
           className="opacity-0 group-hover:opacity-100 text-xs text-blue-600 hover:underline font-medium"
@@ -172,7 +172,7 @@ function NoteLink({ noteId }: { noteId: Id<"notes"> }) {
   return (
     <div 
       onClick={() => router.push(`/notes/${noteId}`)}
-      className="text-xs text-gray-700 hover:text-blue-700 cursor-pointer truncate py-0.5 hover:bg-gray-100 rounded px-1 -ml-1"
+      className="text-xs text-black hover:text-blue-700 cursor-pointer truncate py-0.5 hover:bg-gray-100 rounded px-1 -ml-1"
     >
       📄 {note.title}
     </div>
