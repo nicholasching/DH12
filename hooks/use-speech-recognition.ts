@@ -2,6 +2,48 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
+// Web Speech API types
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
+  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  readonly isFinal: boolean;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  readonly error: string;
+  readonly message: string;
+}
+
 interface UseSpeechRecognitionOptions {
   continuous?: boolean;
   interimResults?: boolean;
@@ -24,6 +66,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const finalTranscriptRef = useRef<string>("");
+  const isRestartingRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Check if browser supports Speech Recognition
@@ -43,9 +86,12 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     recognition.continuous = continuous;
     recognition.interimResults = interimResults;
     recognition.lang = lang;
+    
+    // Optimize for faster response - reduce silence detection time
+    // Note: maxAlternatives doesn't significantly help with speed, but we keep settings minimal
 
     recognition.onstart = () => {
-      setIsListening(true);
+      // State already set in startListening for instant feedback
       setError(null);
     };
 
@@ -89,7 +135,13 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      // If we're restarting, don't update state - the restart will handle it
+      if (!isRestartingRef.current) {
+        setIsListening(false);
+      } else {
+        // Reset the restarting flag after end event
+        isRestartingRef.current = false;
+      }
     };
 
     recognitionRef.current = recognition;
@@ -111,18 +163,36 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     if (!isListening) {
       finalTranscriptRef.current = "";
       setTranscript("");
+      setError(null);
     }
+
+    // Set listening state immediately for instant UI feedback
+    setIsListening(true);
 
     try {
       recognitionRef.current.start();
     } catch (err) {
-      // Already started or error
-      if (err instanceof Error && err.message.includes("start")) {
-        // Already started, stop and restart
-        recognitionRef.current.stop();
-        setTimeout(() => {
-          recognitionRef.current?.start();
-        }, 100);
+      // Already started or error - handle more efficiently
+      if (recognitionRef.current) {
+        try {
+          isRestartingRef.current = true;
+          recognitionRef.current.stop();
+          // Use minimal delay - single requestAnimationFrame is typically ~16ms
+          requestAnimationFrame(() => {
+            try {
+              isRestartingRef.current = false;
+              recognitionRef.current?.start();
+            } catch (restartErr) {
+              isRestartingRef.current = false;
+              setIsListening(false);
+              setError("Failed to start speech recognition. Please try again.");
+            }
+          });
+        } catch (stopErr) {
+          isRestartingRef.current = false;
+          setIsListening(false);
+          setError("Failed to restart speech recognition. Please try again.");
+        }
       }
     }
   }, [isListening]);
@@ -153,7 +223,11 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: {
+      new (): SpeechRecognition;
+    };
+    webkitSpeechRecognition: {
+      new (): SpeechRecognition;
+    };
   }
 }
