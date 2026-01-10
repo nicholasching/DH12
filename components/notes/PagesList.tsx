@@ -2,11 +2,12 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { OverflowMenu } from "@/components/ui/OverflowMenu";
 
 interface PagesListProps {
   notebookId: Id<"notebooks"> | null;
@@ -22,6 +23,7 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
   const createNote = useMutation(api.notes.create);
   const addNoteToFolder = useMutation(api.notebooks.addNoteToFolder);
   const updateNote = useMutation(api.notes.update);
+  const deleteNote = useMutation(api.notes.remove);
 
   const [editingNoteId, setEditingNoteId] = useState<Id<"notes"> | null>(null);
   const [editingValue, setEditingValue] = useState("");
@@ -79,6 +81,18 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
     }
     setEditingNoteId(null);
     setEditingValue("");
+  };
+
+  const handleDeletePage = async (noteId: Id<"notes">) => {
+    try {
+      await deleteNote({ noteId });
+      // If this was the active note, navigate away
+      if (noteId === activeNoteId) {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Failed to delete page:", error);
+    }
   };
 
   if (!notebookId || !folderId) {
@@ -143,6 +157,7 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
                       setEditingNoteId(null);
                       setEditingValue("");
                     }}
+                    onDelete={handleDeletePage}
                     editInputRef={editInputRef}
                   />
                 ))}
@@ -164,6 +179,7 @@ function PageItem({
   onEditChange,
   onEditSubmit,
   onEditCancel,
+  onDelete,
   editInputRef
 }: { 
   noteId: Id<"notes">; 
@@ -174,6 +190,7 @@ function PageItem({
   onEditChange: (value: string) => void;
   onEditSubmit: (noteId: Id<"notes">) => void;
   onEditCancel: () => void;
+  onDelete: (noteId: Id<"notes">) => void;
   editInputRef: React.RefObject<HTMLInputElement>;
 }) {
   const router = useRouter();
@@ -195,7 +212,7 @@ function PageItem({
         onStartEdit(noteId, note.title);
       }}
       className={`
-        px-4 py-2 rounded cursor-pointer transition-colors
+        px-4 py-2 rounded cursor-pointer transition-colors group flex items-center gap-2
         ${isActive ? "bg-gray-200 text-gray-900 font-medium" : "text-gray-700 hover:bg-gray-100"}
       `}
     >
@@ -211,10 +228,16 @@ function PageItem({
             if (e.key === 'Escape') onEditCancel();
           }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full text-sm bg-white border border-blue-500 rounded px-2 py-1"
+          className="flex-1 text-sm bg-white border border-blue-500 rounded px-2 py-1"
         />
       ) : (
-        <div className="text-sm truncate">{note.title}</div>
+        <>
+          <div className="flex-1 text-sm truncate">{note.title}</div>
+          <OverflowMenu
+            onDelete={() => onDelete(noteId)}
+            className="ml-auto"
+          />
+        </>
       )}
     </div>
   );
