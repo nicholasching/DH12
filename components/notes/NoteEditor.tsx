@@ -157,7 +157,62 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     if (isListening) {
       stopListening();
     } else {
+      // Show transcript box immediately for instant UI feedback
       setShowTranscript(true);
+      
+      // Check cursor position and determine if we should insert at cursor or new line
+      if (editor) {
+        const { state } = editor.view;
+        const { selection } = state;
+        const { $from } = selection;
+        const cursorPos = $from.pos;
+        
+        // Get the parent node (paragraph/heading/etc.) and check text around cursor
+        const parent = $from.parent;
+        const parentStart = $from.start($from.depth);
+        const parentEnd = parentStart + parent.content.size;
+        const offsetInParent = cursorPos - parentStart;
+        
+        // Get text content of the parent node
+        const parentText = parent.textContent;
+        
+        // Check if cursor is at document boundaries
+        const isAtDocStart = cursorPos === 0;
+        const isAtDocEnd = cursorPos >= state.doc.content.size;
+        
+        // Check characters immediately before and after cursor in the parent node
+        const charBefore = offsetInParent > 0 ? parentText[offsetInParent - 1] : '';
+        const charAfter = offsetInParent < parentText.length ? parentText[offsetInParent] : '';
+        
+        // Check if cursor is at start/end of parent node or on whitespace
+        const isAtParentStart = offsetInParent === 0;
+        const isAtParentEnd = offsetInParent >= parentText.length;
+        const isOnWhitespace = (charBefore === '' || /\s/.test(charBefore)) && 
+                               (charAfter === '' || /\s/.test(charAfter));
+        
+        // If cursor is on whitespace (or at boundaries), keep cursor there
+        if (isOnWhitespace || isAtParentStart || isAtParentEnd || isAtDocStart || isAtDocEnd) {
+          // Keep cursor where it is - transcription will be inserted here
+          editor.chain().focus().run();
+        } else {
+          // Cursor is on text, move to a new line
+          const docSize = state.doc.content.size;
+          editor.chain()
+            .focus()
+            .setTextSelection(docSize)
+            .run();
+          
+          // Insert a newline if there's existing content
+          if (state.doc.textContent.trim().length > 0) {
+            editor.chain()
+              .focus()
+              .insertContent('\n')
+              .run();
+          }
+        }
+      }
+      
+      // Start listening after UI is updated
       startListening();
     }
   };
@@ -271,7 +326,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
         </div>
       )}
 
-      {showTranscript && (transcript || isListening || speechError) && (
+      {showTranscript && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-semibold text-blue-900">Live Transcription</h4>
