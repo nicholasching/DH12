@@ -1,11 +1,17 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, ReactNodeViewRenderer } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect } from "react";
 import { Id } from "convex/values";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { useUser } from "@clerk/nextjs";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { common, createLowlight } from "lowlight";
+import { CodeBlockComponent } from "./extensions/CodeBlockComponent";
+
+// Initialize lowlight with common languages
+const lowlight = createLowlight(common);
 
 interface NoteEditorProps {
   initialContent: any;
@@ -27,10 +33,13 @@ export function NoteEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        codeBlock: {
-          HTMLAttributes: {
-            class: "bg-gray-800 text-gray-100 p-4 rounded-md font-mono text-sm my-4",
-          },
+        codeBlock: false, // Disable default codeBlock
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(CodeBlockComponent);
         },
       }),
       DrawingNode,
@@ -42,7 +51,8 @@ export function NoteEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose max-w-none focus:outline-none min-h-[500px]",
+        // prose-lg for larger text, darker colors
+        class: "prose prose-lg prose-neutral max-w-none focus:outline-none min-h-[500px] prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-strong:text-gray-900",
       },
     },
   });
@@ -59,7 +69,7 @@ export function NoteEditor({
   return (
     <div className="w-full">
       {editor && (
-        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg">
+        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg shadow-sm">
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}

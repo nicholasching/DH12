@@ -7,9 +7,12 @@ const isPublicRoute = createRouteMatcher([
   "/drawing/(.*)" // Allow public access to drawing pages for iPad
 ]);
 
-export default clerkMiddleware((auth, request) => {
+export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
-    auth().protect();
+    const { userId, redirectToSignIn } = await auth();
+    if (!userId) {
+      return redirectToSignIn();
+    }
   }
 });
 

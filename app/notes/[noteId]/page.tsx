@@ -6,22 +6,44 @@ import { Id } from "convex/values";
 import { FileBrowser } from "@/components/notes/FileBrowser";
 import { NoteEditor } from "@/components/notes/NoteEditor";
 import { useState, useEffect, use } from "react";
-import { AIConversationTab } from "@/components/ai-conversation/AIConversationTab";
 
 export default function NotePage({ params }: { params: Promise<{ noteId: string }> }) {
   const { noteId } = use(params) as { noteId: Id<"notes"> };
   const note = useQuery(api.notes.get, { noteId });
   const updateNote = useMutation(api.notes.update);
   
-  const [showRightPanel, setShowRightPanel] = useState(false);
-  const [activeThreadId, setActiveThreadId] = useState<Id<"threads"> | undefined>(undefined);
+  const [title, setTitle] = useState("");
 
+  // Sync title from backend when it loads or changes externally, 
+  // but only if we haven't modified it recently? 
+  // Actually, we just want to set initial value.
+  useEffect(() => {
+    if (note?.title) {
+      // Only set if we don't have a value yet or it's a fresh load?
+      // Simple approach: Always sync, but the user typing will override locally
+      // race condition is handled by only saving on blur.
+      // But if note updates from server while typing?
+      // We should check if focused?
+      // For now, simpler: Set once.
+      setTitle(note.title);
+    }
+  }, [note?.title]); // This might overwrite if typing fast and a save happens?
+  // Ideally: Local state is source of truth while focused.
+  
   const handleContentChange = async (content: any) => {
     await updateNote({ noteId, content });
   };
 
-  const handleTitleChange = async (title: string) => {
-    await updateNote({ noteId, title });
+  const handleTitleBlur = async () => {
+    if (note && title !== note.title) {
+      await updateNote({ noteId, title });
+    }
+  };
+
+  const handleTitleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
   };
 
   if (note === undefined) return <div className="h-screen flex items-center justify-center">Loading...</div>;
@@ -35,19 +57,13 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
         <div className="h-14 border-b border-gray-300 flex items-center justify-between px-6 bg-white shrink-0">
           <input
             type="text"
-            value={note.title}
-            onChange={(e) => handleTitleChange(e.target.value)}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            onKeyDown={handleTitleKeyDown}
             className="text-xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 w-full text-gray-900"
             placeholder="Untitled Note"
           />
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => setShowRightPanel(!showRightPanel)}
-              className={`px-3 py-1.5 text-sm rounded border transition-colors font-medium ${showRightPanel ? 'bg-blue-50 border-blue-200 text-blue-700' : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}
-            >
-              {showRightPanel ? "Hide AI Panel" : "Show AI Panel"}
-            </button>
-          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -56,23 +72,10 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
               initialContent={note.content} 
               noteId={noteId}
               onChange={handleContentChange}
-              onThreadSelect={(threadId) => {
-                setActiveThreadId(threadId);
-                setShowRightPanel(true);
-              }}
             />
           </div>
         </div>
       </div>
-
-      {showRightPanel && (
-        <div className="w-80 border-l bg-white h-full flex flex-col shrink-0">
-          <AIConversationTab 
-             conversationId={activeThreadId as any} 
-             parentContext={{ noteId }}
-          />
-        </div>
-      )}
     </div>
   );
 }

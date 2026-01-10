@@ -46,33 +46,23 @@ export function DrawingBlock(props: any) {
          </div>
        ) : (
          <div className="relative h-[500px] w-full border-2 border-transparent hover:border-blue-200 transition-colors">
-            {/* If we have data, show preview. If empty, show QR code to draw on iPad */}
-            {(!drawing?.data || showQR) ? (
+            {showQR ? (
                <div className="flex flex-col items-center justify-center h-full bg-gray-50 relative">
-                  {drawing?.data && (
-                    <button 
-                      onClick={() => setShowQR(false)}
-                      className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                    >
-                      ✕ Close QR
-                    </button>
-                  )}
+                  <button 
+                    onClick={() => setShowQR(false)}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                  >
+                    ✕ Close
+                  </button>
                   <QRCodeGenerator drawingId={drawingId} />
                </div>
             ) : (
-                <div className="w-full h-full relative group">
-                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                    <button 
-                      onClick={() => setShowQR(true)}
-                      className="bg-white/90 p-2 rounded shadow text-xs font-medium hover:bg-white"
-                    >
-                      Show QR Code
-                    </button>
-                  </div>
-                  {/* Read-only / Interactive Tldraw */}
-                  <div className="w-full h-full pointer-events-auto">
-                     <DrawingBoard drawingId={drawingId} onSave={() => {}} />
-                  </div>
+                <div className="w-full h-full relative">
+                  <DrawingBoard 
+                    drawingId={drawingId} 
+                    onSave={() => {}} 
+                    onShowQR={() => setShowQR(true)}
+                  />
                 </div>
             )}
          </div>
