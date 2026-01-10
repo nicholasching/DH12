@@ -126,6 +126,32 @@ div[data-testid="style-panel"] {
   font-weight: bold;
 }
 
+/* TipTap Highlight Extension */
+.highlight {
+  background-color: #fef08a;
+  padding: 2px 0;
+  border-radius: 2px;
+}
+
+.ProseMirror mark.highlight {
+  background-color: #fef08a;
+  padding: 2px 0;
+  border-radius: 2px;
+}
+
 .hljs-emphasis {
   font-style: italic;
+}
+
+/* TipTap Highlight Extension */
+.highlight {
+  background-color: #fef08a;
+  padding: 2px 0;
+  border-radius: 2px;
+}
+
+.ProseMirror mark.highlight {
+  background-color: #fef08a;
+  padding: 2px 0;
+  border-radius: 2px;
 }

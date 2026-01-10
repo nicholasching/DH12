@@ -6,11 +6,12 @@ import { forwardRef, useImperativeHandle, useState } from "react";
 import { Id } from "convex/values";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { ThreadMark } from "./extensions/ThreadMark";
+import { Highlight } from "./extensions/Highlight";
 import { useUser } from "@clerk/nextjs";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { CodeBlockComponent } from "./extensions/CodeBlockComponent";
-import { Sparkles, Mic, MicOff, Check, X } from "lucide-react";
+import { Sparkles, Mic, MicOff, Check, X, Highlighter } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
@@ -66,6 +67,11 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
         },
       }),
       DrawingNode,
+      Highlight.configure({
+        HTMLAttributes: {
+          class: 'highlight',
+        },
+      }),
       ThreadMark.configure({
         HTMLAttributes: {
           class: "bg-yellow-200 border-b-2 border-yellow-400 cursor-pointer",
@@ -180,25 +186,35 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       )}
 
       {editor && (
-        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg shadow-sm">
+        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg shadow-sm w-full">
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              title="Bold (Cmd+B)"
             >
               B
             </button>
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('italic') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              title="Italic (Cmd+I)"
             >
               I
             </button>
             <button
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('strike') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              title="Strikethrough"
             >
               S
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleHighlight().run()}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1 ${editor.isActive('highlight') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              title="Highlight (Cmd+Shift+H)"
+            >
+              <Highlighter size={14} />
             </button>
           </div>
           
