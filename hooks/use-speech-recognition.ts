@@ -67,6 +67,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const finalTranscriptRef = useRef<string>("");
   const isRestartingRef = useRef<boolean>(false);
+  const shouldStopRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Check if browser supports Speech Recognition
@@ -96,6 +97,11 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      // Ignore results if we've explicitly stopped
+      if (shouldStopRef.current) {
+        return;
+      }
+
       let interimTranscript = "";
       let finalTranscript = "";
 
@@ -135,6 +141,13 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     };
 
     recognition.onend = () => {
+      // If we explicitly want to stop, don't auto-restart
+      if (shouldStopRef.current) {
+        shouldStopRef.current = false;
+        setIsListening(false);
+        return;
+      }
+      
       // If we're restarting, don't update state - the restart will handle it
       if (!isRestartingRef.current) {
         setIsListening(false);
@@ -158,6 +171,10 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       setError("Speech recognition is not available");
       return;
     }
+
+    // Reset flags for new session
+    shouldStopRef.current = false;
+    isRestartingRef.current = false;
 
     // Reset transcript when starting fresh
     if (!isListening) {
@@ -198,11 +215,27 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   }, [isListening]);
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
+    if (!recognitionRef.current) return;
+    
+    // Mark that we want to stop (prevents auto-restart in continuous mode)
+    shouldStopRef.current = true;
+    isRestartingRef.current = false;
+    
+    try {
+      // Use abort() for immediate stop, or stop() if abort isn't available
+      if (typeof recognitionRef.current.abort === 'function') {
+        recognitionRef.current.abort();
+      } else {
+        recognitionRef.current.stop();
+      }
+      // Update state immediately for instant UI feedback
       setIsListening(false);
+    } catch (err) {
+      // Even if stop fails, update state
+      setIsListening(false);
+      shouldStopRef.current = false;
     }
-  }, [isListening]);
+  }, []);
 
   const resetTranscript = useCallback(() => {
     setTranscript("");
