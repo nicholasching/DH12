@@ -37,3 +37,8 @@ next-env.d.ts
 
 # convex
 .convex/
+
+# cloudflare tunnel
+.cloudflared/
+cloudflared-config.yml
+!cloudflared-config.yml.example

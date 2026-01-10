@@ -26,6 +26,8 @@ An advanced notetaking platform with live transcription, threaded AI explanation
 - Convex account (free tier available)
 - Clerk account (free tier available)
 - Assembly AI account (free tier available)
+- Cloudflare account with a domain (for tunnel access)
+- Cloudflared CLI installed ([Download](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/))
 
 ### Installation
 
@@ -62,12 +64,47 @@ This will:
 - Generate TypeScript types
 - Start the Convex development server
 
-5. Run the development server:
+5. Set up Cloudflare Tunnel (for remote access):
 ```bash
-npm run dev
+# Install cloudflared if you haven't already
+# Windows: Download from https://github.com/cloudflare/cloudflared/releases
+# macOS: brew install cloudflared
+# Linux: Download from releases or use package manager
+
+# Login to Cloudflare (creates .cloudflared/credentials.json)
+npm run tunnel:login
+
+# Create a tunnel (only needed once)
+npm run tunnel:create
+
+# This will output a tunnel ID. Copy it and update cloudflared-config.yml:
+# - Copy cloudflared-config.yml.example to cloudflared-config.yml
+# - Replace <TUNNEL_ID> with your actual tunnel ID
+
+# Route DNS to your tunnel (only needed once)
+npm run tunnel:route
+
+# Check prerequisites before starting (optional but recommended)
+npm run tunnel:check
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Run the development server with tunnel:
+```bash
+npm run dev:tunnel
+```
+
+Or run them separately:
+```bash
+# Terminal 1: Start Next.js
+npm run dev
+
+# Terminal 2: Start tunnel
+npm run tunnel
+```
+
+Access your app at [https://DH.nicholasching.ca](https://DH.nicholasching.ca)
+
+**Note**: Make sure to add `https://DH.nicholasching.ca` to your Clerk Dashboard's allowed origins.
 
 ## Project Structure
 
@@ -102,12 +139,19 @@ DH12/
 
 ### Available Scripts
 
-- `npm run dev` - Start Next.js development server
+- `npm run dev` - Start Next.js development server (localhost only)
+- `npm run dev:tunnel` - Start Next.js dev server and Cloudflare tunnel together
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 - `npm run convex:dev` - Start Convex development server
 - `npm run convex:deploy` - Deploy Convex functions
+- `npm run tunnel` - Start Cloudflare tunnel only
+- `npm run tunnel:login` - Login to Cloudflare (one-time setup, creates credentials)
+- `npm run tunnel:create` - Create a new tunnel (one-time setup)
+- `npm run tunnel:route` - Configure DNS routing (one-time setup)
+- `npm run tunnel:check` - Verify tunnel prerequisites are met
+- `npm run tunnel:preflight` - Check prerequisites then start tunnel
 
 ### Database Schema
 

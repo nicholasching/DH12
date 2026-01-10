@@ -1,0 +1,16 @@
+# Cloudflare Tunnel Configuration Template
+# Copy this file to cloudflared-config.yml and update with your tunnel ID
+
+tunnel: <TUNNEL_ID>
+# IMPORTANT (Windows): cloudflared typically stores tunnel credentials in your
+# user profile/AppData (not inside this repo). If you omit `credentials-file`,
+# cloudflared will look in its default location for:
+#   <tunnel-id>.json
+
+ingress:
+  # Route all traffic to your local Next.js server
+  - hostname: DH.nicholasching.ca
+    service: http://localhost:3000
+  
+  # Catch-all rule (must be last)
+  - service: http_status:404
