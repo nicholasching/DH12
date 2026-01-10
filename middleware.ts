@@ -11,7 +11,10 @@ export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     const { userId, redirectToSignIn } = await auth();
     if (!userId) {
-      return redirectToSignIn();
+      // Use the request's origin for redirects (works with IP addresses)
+      return redirectToSignIn({
+        returnBackUrl: request.url,
+      });
     }
   }
 });
