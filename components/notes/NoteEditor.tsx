@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent, ReactNodeViewRenderer, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect, forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { Id } from "convex/values";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { ThreadMark } from "./extensions/ThreadMark";
@@ -10,9 +10,10 @@ import { useUser } from "@clerk/nextjs";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { CodeBlockComponent } from "./extensions/CodeBlockComponent";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Mic, MicOff, Check, X } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 const lowlight = createLowlight(common);
 
@@ -37,6 +38,20 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
 }, ref) => {
   const { user } = useUser();
   const createThread = useMutation(api.threads.create);
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  const {
+    transcript,
+    isListening,
+    error: speechError,
+    startListening,
+    stopListening,
+    resetTranscript,
+  } = useSpeechRecognition({
+    onResult: (newTranscript) => {
+      // Optional: Auto-update transcript display
+    },
+  });
 
   const editor = useEditor({
     extensions: [
@@ -132,6 +147,22 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     onThreadSelect?.(threadId);
   };
 
+  const handleToggleTranscription = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      setShowTranscript(true);
+      startListening();
+    }
+  };
+
+  const handleInsertTranscript = () => {
+    if (!editor || !transcript.trim()) return;
+    editor.chain().focus().insertContent(transcript).run();
+    resetTranscript();
+    setShowTranscript(false);
+  };
+
   return (
     <div className="w-full relative">
       {editor && (
@@ -200,9 +231,74 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
             >
               + Drawing
             </button>
+            <button
+              onClick={handleToggleTranscription}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                isListening
+                  ? "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200"
+                  : "bg-white text-gray-700 hover:bg-gray-200 border border-gray-200"
+              }`}
+            >
+              {isListening ? (
+                <>
+                  <MicOff size={14} />
+                  Stop
+                </>
+              ) : (
+                <>
+                  <Mic size={14} />
+                  Transcribe
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
+
+      {showTranscript && (transcript || isListening || speechError) && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="text-sm font-semibold text-blue-900">Live Transcription</h4>
+            <div className="flex items-center gap-2">
+              {isListening && (
+                <span className="flex items-center gap-1 text-xs text-blue-700">
+                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                  Listening...
+                </span>
+              )}
+              {transcript && (
+                <button
+                  onClick={handleInsertTranscript}
+                  className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors flex items-center gap-1"
+                >
+                  <Check size={12} />
+                  Insert
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  stopListening();
+                  setShowTranscript(false);
+                  resetTranscript();
+                }}
+                className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
+              >
+                <X size={12} />
+                Close
+              </button>
+            </div>
+          </div>
+          {speechError && (
+            <div className="mb-2 p-2 bg-red-100 border border-red-300 text-red-700 text-sm rounded">
+              {speechError}
+            </div>
+          )}
+          <div className="text-sm text-gray-800 whitespace-pre-wrap min-h-[60px] max-h-[200px] overflow-y-auto">
+            {transcript || (isListening ? "Listening for speech..." : "No transcript yet")}
+          </div>
+        </div>
+      )}
+
       <EditorContent editor={editor} />
     </div>
   );
