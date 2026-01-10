@@ -53,3 +53,41 @@ export const update = mutation({
     });
   },
 });
+
+export const remove = mutation({
+  args: { noteId: v.id("notes") },
+  handler: async (ctx, args) => {
+    const note = await ctx.db.get(args.noteId);
+    if (!note) throw new Error("Note not found");
+
+    // Remove note from folder structure
+    const notebook = await ctx.db.get(note.notebookId);
+    if (notebook) {
+      const folders = notebook.structure.folders || {};
+      for (const [folderId, folder] of Object.entries(folders)) {
+        const folderData = folder as any;
+        if (folderData.notes?.includes(args.noteId)) {
+          const newNotes = folderData.notes.filter((id: any) => id !== args.noteId);
+          const newStructure = {
+            ...notebook.structure,
+            folders: {
+              ...folders,
+              [folderId]: {
+                ...folderData,
+                notes: newNotes,
+              },
+            },
+          };
+          await ctx.db.patch(note.notebookId, {
+            structure: newStructure,
+            updatedAt: Date.now(),
+          });
+          break;
+        }
+      }
+    }
+
+    // Delete the note
+    await ctx.db.delete(args.noteId);
+  },
+});

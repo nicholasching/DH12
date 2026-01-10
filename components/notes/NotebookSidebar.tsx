@@ -2,16 +2,18 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, ChevronRight, ChevronLeft, BookOpen, Play, FileText, ClipboardList, Folder, Plus } from "lucide-react";
+import { OverflowMenu } from "@/components/ui/OverflowMenu";
+import { useRouter } from "next/navigation";
 
 interface NotebookSidebarProps {
   selectedNotebookId: Id<"notebooks"> | null;
   selectedFolderId: string | null;
   onNotebookSelect: (notebookId: Id<"notebooks">) => void;
-  onFolderSelect: (notebookId: Id<"notebooks">, folderId: string) => void;
+  onFolderSelect: (notebookId: Id<"notebooks">, folderId: string | null) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -25,11 +27,15 @@ export function NotebookSidebar({
   onToggleCollapse,
 }: NotebookSidebarProps) {
   const { user } = useUser();
+  const router = useRouter();
   const notebooks = useQuery(
     api.notebooks.list,
     user?.id ? { userId: user.id } : "skip"
   );
   const addFolder = useMutation(api.notebooks.addFolder);
+  const createNotebook = useMutation(api.notebooks.create);
+  const deleteNotebook = useMutation(api.notebooks.remove);
+  const deleteFolder = useMutation(api.notebooks.deleteFolder);
   const updateNotebook = useMutation(api.notebooks.update);
   const updateFolder = useMutation(api.notebooks.updateFolder);
 
@@ -37,7 +43,9 @@ export function NotebookSidebar({
   const [editingId, setEditingId] = useState<{ type: 'notebook' | 'folder', notebookId: string, folderId?: string } | null>(null);
   const [editingValue, setEditingValue] = useState("");
   const [isAddingFolder, setIsAddingFolder] = useState<Id<"notebooks"> | null>(null);
+  const [isAddingNotebook, setIsAddingNotebook] = useState(false);
   const [newFolderTitle, setNewFolderTitle] = useState("");
+  const [newNotebookTitle, setNewNotebookTitle] = useState("");
   const editInputRef = useRef<HTMLInputElement>(null);
 
   const toggleNotebook = (notebookId: string) => {
@@ -88,6 +96,53 @@ export function NotebookSidebar({
     }
   };
 
+  const handleAddNotebook = async () => {
+    if (!user || !newNotebookTitle.trim()) {
+      setIsAddingNotebook(false);
+      setNewNotebookTitle("");
+      return;
+    }
+
+    try {
+      const notebookId = await createNotebook({
+        userId: user.id,
+        title: newNotebookTitle.trim() || "Untitled Notebook",
+      });
+      setNewNotebookTitle("");
+      setIsAddingNotebook(false);
+      // Select and expand the new notebook
+      setExpandedNotebooks((prev) => ({ ...prev, [notebookId]: true }));
+      onNotebookSelect(notebookId);
+    } catch (error) {
+      console.error("Failed to add notebook:", error);
+    }
+  };
+
+  const handleDeleteNotebook = async (notebookId: Id<"notebooks">) => {
+    try {
+      await deleteNotebook({ notebookId });
+      if (selectedNotebookId === notebookId) {
+        onNotebookSelect(null as any); // Clear selection
+      }
+    } catch (error) {
+      console.error("Failed to delete notebook:", error);
+    }
+  };
+
+  const handleDeleteFolder = async (notebookId: Id<"notebooks">, folderId: string) => {
+    try {
+      await deleteFolder({ notebookId, folderId });
+      // Clear folder selection if this was the selected folder
+      if (selectedNotebookId === notebookId && selectedFolderId === folderId) {
+        // The query will automatically refetch, so we just clear the selection
+        // The component will re-render with updated data
+        onFolderSelect(notebookId, null);
+      }
+    } catch (error) {
+      console.error("Failed to delete folder:", error);
+    }
+  };
+
   useEffect(() => {
     if (editingId && editInputRef.current) {
       editInputRef.current.focus();
@@ -134,6 +189,36 @@ export function NotebookSidebar({
 
       {!isCollapsed && (
         <div className="flex-1 overflow-y-auto p-2">
+        <div className="mb-4 px-3">
+          {isAddingNotebook ? (
+            <div className="flex gap-1">
+              <input
+                autoFocus
+                type="text"
+                value={newNotebookTitle}
+                onChange={(e) => setNewNotebookTitle(e.target.value)}
+                onBlur={handleAddNotebook}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddNotebook();
+                  if (e.key === 'Escape') {
+                    setIsAddingNotebook(false);
+                    setNewNotebookTitle("");
+                  }
+                }}
+                placeholder="Notebook name"
+                className="flex-1 text-sm px-2 py-1 border border-blue-500 rounded bg-white"
+              />
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsAddingNotebook(true)}
+              className="w-full flex items-center justify-center gap-1 text-xs text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-300 transition-colors"
+            >
+              <Plus size={14} />
+              <span>Add Notebook</span>
+            </button>
+          )}
+        </div>
         {notebooks.map((notebook, index) => {
           const isExpanded = expandedNotebooks[notebook._id] ?? false;
           const isSelected = selectedNotebookId === notebook._id;
@@ -182,6 +267,10 @@ export function NotebookSidebar({
                     {notebook.title}
                   </span>
                 )}
+                <OverflowMenu
+                  onDelete={() => handleDeleteNotebook(notebook._id)}
+                  className="ml-auto"
+                />
               </div>
 
               {isExpanded && (
@@ -227,6 +316,10 @@ export function NotebookSidebar({
                             {folder.title}
                           </span>
                         )}
+                        <OverflowMenu
+                          onDelete={() => handleDeleteFolder(notebook._id, folderId)}
+                          className="ml-auto"
+                        />
                       </div>
                     );
                   })}

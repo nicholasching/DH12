@@ -145,6 +145,48 @@ export const updateFolder = mutation({
 export const remove = mutation({
   args: { notebookId: v.id("notebooks") },
   handler: async (ctx, args) => {
+    // Also delete all notes in this notebook
+    const notes = await ctx.db
+      .query("notes")
+      .withIndex("by_notebook", (q) => q.eq("notebookId", args.notebookId))
+      .collect();
+    
+    for (const note of notes) {
+      await ctx.db.delete(note._id);
+    }
+    
     await ctx.db.delete(args.notebookId);
+  },
+});
+
+export const deleteFolder = mutation({
+  args: {
+    notebookId: v.id("notebooks"),
+    folderId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const notebook = await ctx.db.get(args.notebookId);
+    if (!notebook) throw new Error("Notebook not found");
+
+    const folders = notebook.structure.folders;
+    if (!folders[args.folderId]) throw new Error("Folder not found");
+
+    // Delete all notes in this folder
+    const noteIds = folders[args.folderId].notes || [];
+    for (const noteId of noteIds) {
+      await ctx.db.delete(noteId);
+    }
+
+    // Remove folder from structure
+    const { [args.folderId]: _, ...remainingFolders } = folders;
+    const newStructure = {
+      ...notebook.structure,
+      folders: remainingFolders,
+    };
+
+    await ctx.db.patch(args.notebookId, {
+      structure: newStructure,
+      updatedAt: Date.now(),
+    });
   },
 });

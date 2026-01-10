@@ -84,7 +84,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
     setSelectedFolderId(null);
   };
 
-  const handleFolderSelect = (notebookId: Id<"notebooks">, folderId: string) => {
+  const handleFolderSelect = (notebookId: Id<"notebooks">, folderId: string | null) => {
     setSelectedNotebookId(notebookId);
     setSelectedFolderId(folderId);
   };
