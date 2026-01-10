@@ -8,8 +8,11 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { debounce } from "lodash"; // We might need lodash or implement debounce
 
+import { useRouter } from "next/navigation";
+
 export default function DrawingPage({ params }: { params: Promise<{ drawingId: string }> }) {
   const { drawingId } = use(params) as { drawingId: Id<"drawings"> };
+  const router = useRouter();
   
   const drawing = useQuery(api.drawings.get, { drawingId });
   const updateDrawing = useMutation(api.drawings.update);
@@ -26,6 +29,14 @@ export default function DrawingPage({ params }: { params: Promise<{ drawingId: s
           await updateDrawing({ drawingId, data: JSON.stringify(data) });
         }}
       />
+      {drawing.noteId && (
+        <button 
+          onClick={() => router.push(`/notes/${drawing.noteId}`)}
+          className="absolute top-4 right-4 z-[9999] px-4 py-2 bg-white rounded-lg shadow-md text-sm font-medium hover:bg-gray-50 border border-gray-200 transition-colors"
+        >
+          ← Back to Note
+        </button>
+      )}
     </div>
   );
 }

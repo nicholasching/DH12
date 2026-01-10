@@ -6,7 +6,7 @@ import { Id } from "convex/values";
 import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { QrCode, ZoomIn, ZoomOut } from "lucide-react";
+import { QrCode, ZoomIn, ZoomOut, ExternalLink } from "lucide-react";
 
 interface DrawingBoardProps {
   drawingId?: Id<"drawings">;
@@ -57,6 +57,12 @@ export function DrawingBoard({ drawingId, onSave, onShowQR }: DrawingBoardProps)
     editorRef.current?.zoomOut();
   };
 
+  const handleOpenNewTab = () => {
+    if (drawingId) {
+      window.open(`/drawing/${drawingId}`, '_blank');
+    }
+  };
+
   return (
     <div className="relative w-full h-full border rounded-lg overflow-hidden bg-white group">
       <div 
@@ -105,6 +111,13 @@ export function DrawingBoard({ drawingId, onSave, onShowQR }: DrawingBoardProps)
           title="Show QR Code"
         >
           <QrCode size={16} />
+        </button>
+        <button
+          onClick={handleOpenNewTab}
+          className="p-2 bg-white rounded shadow border hover:bg-gray-50"
+          title="Open in New Tab"
+        >
+          <ExternalLink size={16} />
         </button>
         <div className="flex flex-col bg-white rounded shadow border overflow-hidden">
           <button

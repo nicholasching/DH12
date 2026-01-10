@@ -6,6 +6,7 @@ import { Id } from "convex/values";
 import { FileBrowser } from "@/components/notes/FileBrowser";
 import { NoteEditor } from "@/components/notes/NoteEditor";
 import { useState, useEffect, use } from "react";
+import { FloatingChat } from "@/components/ai-conversation/FloatingChat";
 
 export default function NotePage({ params }: { params: Promise<{ noteId: string }> }) {
   const { noteId } = use(params) as { noteId: Id<"notes"> };
@@ -13,22 +14,13 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
   const updateNote = useMutation(api.notes.update);
   
   const [title, setTitle] = useState("");
+  const [activeThreadId, setActiveThreadId] = useState<Id<"threads"> | null>(null);
 
-  // Sync title from backend when it loads or changes externally, 
-  // but only if we haven't modified it recently? 
-  // Actually, we just want to set initial value.
   useEffect(() => {
     if (note?.title) {
-      // Only set if we don't have a value yet or it's a fresh load?
-      // Simple approach: Always sync, but the user typing will override locally
-      // race condition is handled by only saving on blur.
-      // But if note updates from server while typing?
-      // We should check if focused?
-      // For now, simpler: Set once.
       setTitle(note.title);
     }
-  }, [note?.title]); // This might overwrite if typing fast and a save happens?
-  // Ideally: Local state is source of truth while focused.
+  }, [note?.title]); 
   
   const handleContentChange = async (content: any) => {
     await updateNote({ noteId, content });
@@ -50,7 +42,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
   if (note === null) return <div className="h-screen flex items-center justify-center">Note not found</div>;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden bg-white relative">
       <FileBrowser notebookId={note.notebookId} activeNoteId={noteId} />
 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -72,10 +64,19 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
               initialContent={note.content} 
               noteId={noteId}
               onChange={handleContentChange}
+              onThreadSelect={(threadId) => setActiveThreadId(threadId)}
             />
           </div>
         </div>
       </div>
+
+      {activeThreadId && (
+        <FloatingChat 
+          threadId={activeThreadId}
+          noteId={noteId}
+          onClose={() => setActiveThreadId(null)}
+        />
+      )}
     </div>
   );
 }

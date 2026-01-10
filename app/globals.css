@@ -39,6 +39,24 @@ body {
   pointer-events: none;
 }
 
+/* Tldraw UI Overrides */
+/* Attempt to push the style panel down. 
+   Tldraw class names are prefixed but usually contain 'style-panel' in semantic parts or data attributes.
+*/
+.tlui-style-panel {
+  margin-top: 60px !important;
+}
+
+/* Also target the top-right layout container just in case */
+.tlui-layout__top-right {
+  top: 60px !important;
+}
+
+/* Fallback: If style panel is absolute/fixed, try data attribute */
+div[data-testid="style-panel"] {
+  margin-top: 60px !important;
+}
+
 /* Highlight.js Theme (GitHub Dark) */
 .hljs {
   display: block;
