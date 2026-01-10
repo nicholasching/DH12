@@ -21,17 +21,15 @@ export const getByNote = query({
 export const create = mutation({
   args: {
     userId: v.string(),
-    noteId: v.optional(v.id("notes")),
-    qrCode: v.string(),
-    tldrawData: v.string(),
+    noteId: v.id("notes"),
+    data: v.any(),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
     return await ctx.db.insert("drawings", {
       userId: args.userId,
       noteId: args.noteId,
-      qrCode: args.qrCode,
-      tldrawData: args.tldrawData,
+      data: args.data,
       createdAt: now,
       updatedAt: now,
     });
@@ -41,11 +39,11 @@ export const create = mutation({
 export const update = mutation({
   args: {
     drawingId: v.id("drawings"),
-    tldrawData: v.string(),
+    data: v.any(),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.drawingId, {
-      tldrawData: args.tldrawData,
+      data: args.data,
       updatedAt: Date.now(),
     });
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { QRCodeSVG } from "react-qr-code";
+import QRCode from "react-qr-code";
 import { useState } from "react";
 
 interface QRCodeGeneratorProps {
@@ -29,7 +29,7 @@ export function QRCodeGenerator({
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 border rounded-lg">
-      <QRCodeSVG value={qrData} size={256} />
+      <QRCode value={qrData} size={256} />
       <div className="text-sm text-gray-600 break-all max-w-xs text-center">
         {qrUrl}
       </div>

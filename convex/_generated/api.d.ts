@@ -8,10 +8,10 @@
  * @module
  */
 
-import type * as conversations from "../conversations.js";
 import type * as drawings from "../drawings.js";
 import type * as notebooks from "../notebooks.js";
 import type * as notes from "../notes.js";
+import type * as threads from "../threads.js";
 import type * as transcriptions from "../transcriptions.js";
 
 import type {
@@ -21,10 +21,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  conversations: typeof conversations;
   drawings: typeof drawings;
   notebooks: typeof notebooks;
   notes: typeof notes;
+  threads: typeof threads;
   transcriptions: typeof transcriptions;
 }>;
 

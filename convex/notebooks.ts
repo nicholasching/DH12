@@ -23,30 +23,75 @@ export const create = mutation({
   args: {
     userId: v.string(),
     title: v.string(),
-    description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
     return await ctx.db.insert("notebooks", {
       userId: args.userId,
       title: args.title,
-      description: args.description,
+      structure: { folders: {} },
       createdAt: now,
       updatedAt: now,
     });
   },
 });
 
-export const update = mutation({
+export const addFolder = mutation({
   args: {
     notebookId: v.id("notebooks"),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
+    title: v.string(),
   },
   handler: async (ctx, args) => {
-    const { notebookId, ...updates } = args;
-    await ctx.db.patch(notebookId, {
-      ...updates,
+    const notebook = await ctx.db.get(args.notebookId);
+    if (!notebook) throw new Error("Notebook not found");
+
+    const folderId = crypto.randomUUID();
+    const newStructure = {
+      ...notebook.structure,
+      folders: {
+        ...notebook.structure.folders,
+        [folderId]: {
+          title: args.title,
+          notes: [],
+        },
+      },
+    };
+
+    await ctx.db.patch(args.notebookId, {
+      structure: newStructure,
+      updatedAt: Date.now(),
+    });
+    
+    return folderId;
+  },
+});
+
+export const addNoteToFolder = mutation({
+  args: {
+    notebookId: v.id("notebooks"),
+    folderId: v.string(),
+    noteId: v.id("notes"),
+  },
+  handler: async (ctx, args) => {
+    const notebook = await ctx.db.get(args.notebookId);
+    if (!notebook) throw new Error("Notebook not found");
+
+    const folders = notebook.structure.folders;
+    if (!folders[args.folderId]) throw new Error("Folder not found");
+
+    const newStructure = {
+      ...notebook.structure,
+      folders: {
+        ...folders,
+        [args.folderId]: {
+          ...folders[args.folderId],
+          notes: [...folders[args.folderId].notes, args.noteId],
+        },
+      },
+    };
+
+    await ctx.db.patch(args.notebookId, {
+      structure: newStructure,
       updatedAt: Date.now(),
     });
   },
