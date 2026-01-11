@@ -211,12 +211,13 @@ export function NotebookSidebar({
             </div>
           ) : (
             <button
-              onClick={() => setIsAddingNotebook(true)}
-              className="w-full flex items-center justify-center gap-1 text-xs text-gray-600 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-300 transition-colors"
-            >
-              <Plus size={14} />
-              <span>Add Notebook</span>
-            </button>
+            onClick={() => setIsAddingNotebook(true)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+          >
+            <Plus size={16} />
+            <span>Add Notebook</span>
+          </button>
+
           )}
         </div>
         {notebooks.map((notebook, index) => {
