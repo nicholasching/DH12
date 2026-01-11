@@ -111,7 +111,9 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
     <div className={`${isCollapsed ? 'w-0' : 'w-full border-r border-gray-300 '} bg-white h-full flex flex-col transition-all duration-200 relative`}>
       <button
         onClick={onToggleCollapse}
-        className="absolute -right-3 bottom-4 z-10 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+        onMouseEnter={(e) => e.stopPropagation()}
+        onMouseLeave={(e) => e.stopPropagation()}
+        className="absolute -right-3 bottom-4 z-30 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors pointer-events-auto"
         aria-label={isCollapsed ? "Expand pages list" : "Collapse pages list"}
       >
         {isCollapsed ? (
