@@ -6,7 +6,9 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
 import { OverflowMenu } from "@/components/ui/OverflowMenu";
+import { Button } from "@/components/ui/button";
 
 export function NotebookList() {
   const { user } = useUser();
@@ -148,12 +150,13 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
         <div className="p-4 border-t border-gray-200 bg-gray-100 rounded-b-lg">
           <div className="flex justify-between items-center mb-3">
             <h4 className="font-medium text-sm text-black">Folders</h4>
-            <button 
+            <Button 
               onClick={(e) => { e.stopPropagation(); setIsAddingFolder(true); }}
-              className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 font-medium border border-blue-200"
+              variant="secondary"
+              className="text-xs px-2 py-1"
             >
               + New Folder
-            </button>
+            </Button>
           </div>
 
           {isAddingFolder && (
@@ -167,7 +170,7 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
                 className="flex-1 text-sm px-2 py-1 border rounded"
                 onClick={(e) => e.stopPropagation()}
               />
-              <button type="submit" className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Add</button>
+              <Button type="submit" className="text-xs px-2 py-1">Add</Button>
             </form>
           )}
 

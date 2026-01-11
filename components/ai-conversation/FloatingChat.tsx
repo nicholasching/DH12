@@ -6,6 +6,7 @@ import { Id } from "convex/values";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { X, Send, MessageSquare, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface FloatingChatProps {
   threadId: Id<"threads">;
@@ -171,13 +172,13 @@ export function FloatingChat({ threadId, noteId, onClose, onThreadDelete }: Floa
               className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isGenerating}
             />
-            <button 
+            <Button 
               type="submit"
               disabled={!input.trim() || isGenerating}
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:opacity-50"
+              className="p-2"
             >
               <Send size={16} />
-            </button>
+            </Button>
           </form>
         </div>
       </div>

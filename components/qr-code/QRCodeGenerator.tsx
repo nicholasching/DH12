@@ -2,6 +2,7 @@
 
 import QRCode from "react-qr-code";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 
 interface QRCodeGeneratorProps {
   drawingId: string;
@@ -33,12 +34,9 @@ export function QRCodeGenerator({
       <div className="text-sm text-gray-600 break-all max-w-xs text-center">
         {qrUrl}
       </div>
-      <button
-        onClick={handleCopy}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
+      <Button onClick={handleCopy}>
         {copied ? "Copied!" : "Copy URL"}
-      </button>
+      </Button>
       <p className="text-xs text-gray-500 text-center">
         Scan this QR code on your drawing device to open the drawing board
       </p>

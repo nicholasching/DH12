@@ -15,6 +15,7 @@ import { Sparkles, Mic, MicOff, Check, X, Highlighter } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { Button } from "../ui/button";
 
 const lowlight = createLowlight(common);
 
@@ -229,13 +230,13 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       {editor && (
         <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
           <div className="bg-white shadow-lg border rounded-lg p-1 flex items-center gap-1">
-            <button
+            <Button
               onClick={handleCreateThread}
               className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
             >
               <Sparkles size={14} />
               Ask AI
-            </button>
+            </Button>
           </div>
         </BubbleMenu>
       )}
@@ -243,66 +244,66 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       {editor && (
         <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg shadow-sm w-full">
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
-            <button
+            <Button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Bold (Cmd+B)"
             >
               B
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('italic') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Italic (Cmd+I)"
             >
               I
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('strike') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Strikethrough"
             >
               S
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => editor.chain().focus().toggleHighlight().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1 ${editor.isActive('highlight') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Highlight (Cmd+Shift+H)"
             >
               <Highlighter size={14} />
-            </button>
+            </Button>
           </div>
           
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
-            <button
+            <Button
                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
             >
               H1
-            </button>
-            <button
+            </Button>
+            <Button
                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
             >
               H2
-            </button>
+            </Button>
           </div>
 
           <div className="flex gap-1">
-            <button
+            <Button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
             >
               Code
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={addDrawing}
               disabled={!noteId}
               className="px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-blue-50 text-blue-700 bg-white border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               + Drawing
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleToggleTranscription}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${
                 isListening
@@ -321,7 +322,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                   Transcribe
                 </>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -338,15 +339,15 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                 </span>
               )}
               {transcript && (
-                <button
+                <Button
                   onClick={handleInsertTranscript}
                   className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors flex items-center gap-1"
                 >
                   <Check size={12} />
                   Insert
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 onClick={() => {
                   stopListening();
                   setShowTranscript(false);
@@ -356,7 +357,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
               >
                 <X size={12} />
                 Close
-              </button>
+              </Button>
             </div>
           </div>
           {speechError && (

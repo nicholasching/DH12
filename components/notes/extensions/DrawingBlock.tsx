@@ -8,6 +8,7 @@ import { Id } from "convex/values";
 import { useEffect, useState } from "react";
 import { DrawingBoard } from "@/components/drawing/DrawingBoard";
 import { useUser } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
 
 export function DrawingBlock(props: any) {
   const { node, updateAttributes } = props;
@@ -37,12 +38,9 @@ export function DrawingBlock(props: any) {
        {!drawingId ? (
          <div className="p-8 text-center bg-gray-50 flex flex-col items-center justify-center h-48">
            <p className="mb-4 text-gray-500 font-medium">Add a Drawing Canvas</p>
-           <button 
-             onClick={handleInitDrawing}
-             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-           >
+           <Button onClick={handleInitDrawing}>
              Create Canvas
-           </button>
+           </Button>
          </div>
        ) : (
          <div className="relative h-[500px] w-full border-2 border-transparent hover:border-blue-200 transition-colors">

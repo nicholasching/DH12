@@ -13,9 +13,9 @@ export function Button({
 }: ButtonProps) {
   const baseStyles = "px-4 py-2 rounded-lg font-medium transition-colors";
   const variants = {
-    primary: "bg-blue-500 text-white hover:bg-blue-600",
-    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300",
-    danger: "bg-red-500 text-white hover:bg-red-600",
+    primary: "bg-[var(--button-primary)] text-white hover:bg-[var(--button-primary-hover)]",
+    secondary: "bg-[var(--button-secondary)] text-[var(--button-secondary-text)] hover:bg-[var(--button-secondary-hover)]",
+    danger: "bg-[var(--button-danger)] text-white hover:bg-[var(--button-danger-hover)]",
   };
 
   return (
