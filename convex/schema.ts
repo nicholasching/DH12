@@ -29,6 +29,7 @@ export default defineSchema({
     title: v.string(),
     content: v.any(), // TipTap JSON content
     sharedWith: v.optional(v.array(v.string())), // Array of emails
+    version: v.optional(v.number()), // Version number for optimistic updates
     createdAt: v.number(),
     updatedAt: v.number(),
   })
