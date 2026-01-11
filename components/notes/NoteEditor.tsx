@@ -4,6 +4,7 @@ import { useEditor, EditorContent, ReactNodeViewRenderer, BubbleMenu } from "@ti
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import { forwardRef, useImperativeHandle, useState, useEffect, useCallback } from "react";
+import { isEqual } from "lodash";
 import { Id } from "@/convex/_generated/dataModel";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { ThreadMark } from "./extensions/ThreadMark";
@@ -17,9 +18,10 @@ import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { Button } from "../ui/button";
-const lowlight = createLowlight(common);
-
 import { CursorPresence } from "./CursorPresence";
+import { debounce } from "lodash";
+
+const lowlight = createLowlight(common);
 
 export interface NoteEditorHandle {
   removeThreadMark: (threadId: string) => void;
@@ -44,6 +46,14 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
   const createThread = useMutation(api.threads.create);
   const [showTranscript, setShowTranscript] = useState(false);
 
+  // Debounce the onChange callback to reduce server load/conflicts
+  const debouncedOnChange = useCallback(
+    debounce((content: any) => {
+      onChange?.(content);
+    }, 1000), // 1 second debounce
+    [onChange]
+  );
+
   const {
     transcript,
     isListening,
@@ -56,6 +66,13 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
   const formatTranscript = useAction(api.ai.formatTranscript);
   const [isFormatting, setIsFormatting] = useState(false);
   const [formattedTranscript, setFormattedTranscript] = useState<string | null>(null);
+
+  // Clean up debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedOnChange.cancel();
+    };
+  }, [debouncedOnChange]);
 
   const editor = useEditor({
     extensions: [
@@ -85,7 +102,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     content: initialContent,
     editable: editable,
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getJSON());
+      debouncedOnChange(editor.getJSON());
     },
     // Add click handler to detect thread clicks
     editorProps: {
@@ -105,6 +122,28 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       },
     },
   });
+
+  // Sync with server updates
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+
+    // We only update if the content is different to avoid cursor jumping on local updates
+    // and infinite loops if initialContent matches what we just typed.
+    const currentContent = editor.getJSON();
+    if (!isEqual(currentContent, initialContent)) {
+       // Save cursor position
+       const { from, to } = editor.state.selection;
+       
+       // Update content
+       editor.commands.setContent(initialContent);
+       
+       // Restore cursor position if possible
+       const newSize = editor.state.doc.content.size;
+       if (from <= newSize && to <= newSize) {
+         editor.commands.setTextSelection({ from, to });
+       }
+    }
+  }, [initialContent, editor]);
 
   const handleFormatTranscript = useCallback(async (): Promise<string | null> => {
     if (!transcript.trim() || isFormatting) return null;
@@ -323,6 +362,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
                variant="secondary"
+               title="Heading 1"
             >
               H1
             </Button>
@@ -330,6 +370,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
                variant="secondary"
+               title="Heading 2"
             >
               H2
             </Button>

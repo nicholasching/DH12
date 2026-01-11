@@ -39,7 +39,7 @@ export function CursorPresence({ editor, noteId }: CursorPresenceProps) {
   const cursors = useQuery(api.cursors.list, { noteId });
   const [tick, setTick] = useState(0);
 
-  // Debounce helper
+// Debounce helper
   const debounce = (func: Function, wait: number) => {
     let timeout: NodeJS.Timeout;
     return (...args: any[]) => {
