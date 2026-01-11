@@ -32,7 +32,7 @@ export default function DrawingPage({ params }: { params: Promise<{ drawingId: s
       {drawing.noteId && (
         <button 
           onClick={() => router.push(`/notes/${drawing.noteId}`)}
-          className="absolute top-4 right-4 z-[9999] px-4 py-2 bg-white rounded-lg shadow-md text-sm font-medium hover:bg-gray-50 border border-gray-200 transition-colors"
+          className="absolute top-4 right-2.5 z-[9999] px-5 py-2 bg-white rounded-lg shadow-md text-sm font-medium hover:bg-gray-50 border border-gray-200 text-black transition-colors"
         >
           ← Back to Note
         </button>
