@@ -57,6 +57,13 @@ body {
   pointer-events: none;
 }
 
+/* Reduce line spacing in note editor */
+.ProseMirror p {
+  line-height: 1.5;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 /* Tldraw UI Overrides */
 /* Attempt to push the style panel down. 
    Tldraw class names are prefixed but usually contain 'style-panel' in semantic parts or data attributes.
