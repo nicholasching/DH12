@@ -320,8 +320,8 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       )}
 
       {editor && (
-        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center justify-center p-2 shadow-sm" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
-          <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
+        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center justify-center px-2 py-2 shadow-sm" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
+          <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
@@ -364,7 +364,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
             </Button>
           </div>
           
-          <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
+          <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
                className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
