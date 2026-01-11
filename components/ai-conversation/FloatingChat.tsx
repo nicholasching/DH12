@@ -81,11 +81,9 @@ export function FloatingChat({ threadId, noteId, onClose, onThreadDelete }: Floa
   };
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this thread?")) {
-      await deleteThread({ threadId });
-      onThreadDelete?.(threadId);
-      onClose();
-    }
+    await deleteThread({ threadId });
+    onThreadDelete?.(threadId);
+    onClose();
   };
 
   if (!thread) return null;

@@ -310,7 +310,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
           <div className="bg-white shadow-lg border rounded-lg p-1 flex items-center gap-1">
             <Button
               onClick={handleCreateThread}
-              className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+              className="flex items-center gap-1 text-xs font-medium text-blue-600 px-2 py-1 rounded transition-colors"
             >
               <Sparkles size={14} />
               Ask AI

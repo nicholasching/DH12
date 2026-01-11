@@ -68,7 +68,8 @@ export function ShareDialog({ noteId }: ShareDialogProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading || isSuccess}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  style={{ color: '#000000', backgroundColor: '#ffffff' }}
                   autoFocus
                 />
               </div>
