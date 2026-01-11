@@ -25,8 +25,9 @@ export function NotebookList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {notebooks.length === 0 ? (
-        <div className="col-span-full text-center py-12 text-black bg-white rounded-lg border border-dashed">
-          No notebooks yet. Create one to get started!
+        <div className="col-span-full text-center py-16 text-gray-600 bg-white rounded-lg border-2 border-dashed border-gray-300">
+          <p className="text-lg font-medium mb-2">No notebooks yet</p>
+          <p className="text-sm">Click "New Notebook" above to create your first one!</p>
         </div>
       ) : (
         notebooks.map((notebook) => (
@@ -105,43 +106,67 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
     }
   }, [isEditing]);
 
+  const folderCount = Object.keys(notebook.structure?.folders || {}).length;
+  const totalNotes = Object.values(notebook.structure?.folders || {}).reduce(
+    (acc: number, folder: any) => acc + (folder.notes?.length || 0),
+    0
+  );
+
   return (
-    <div className={`bg-white rounded-lg border transition-all ${isExpanded ? 'row-span-2 ring-2 ring-blue-500' : 'hover:shadow-md'}`}>
+    <div className={`bg-white rounded-lg border transition-all shadow-sm ${isExpanded ? 'ring-2 ring-blue-500 shadow-lg' : 'hover:shadow-md'}`}>
       <div 
-        className="p-4 cursor-pointer flex justify-between items-center group"
+        className="p-5 cursor-pointer group"
         onClick={onToggle}
         onDoubleClick={handleDoubleClick}
       >
-        {isEditing ? (
-          <input
-            ref={editInputRef}
-            type="text"
-            value={editingValue}
-            onChange={(e) => setEditingValue(e.target.value)}
-            onBlur={handleRenameSubmit}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleRenameSubmit();
-              if (e.key === 'Escape') {
-                setIsEditing(false);
-                setEditingValue("");
-              }
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="flex-1 font-semibold text-lg text-black bg-white border border-blue-500 rounded px-2 py-1"
-          />
-        ) : (
-          <>
-            <h3 className="font-semibold text-lg text-black">{notebook.title}</h3>
-            <span className="text-sm text-black">
-              {Object.keys(notebook.structure?.folders || {}).length} folders
-            </span>
-          </>
-        )}
+        <div className="flex justify-between items-start mb-2">
+          {isEditing ? (
+            <input
+              ref={editInputRef}
+              type="text"
+              value={editingValue}
+              onChange={(e) => setEditingValue(e.target.value)}
+              onBlur={handleRenameSubmit}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRenameSubmit();
+                if (e.key === 'Escape') {
+                  setIsEditing(false);
+                  setEditingValue("");
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 font-semibold text-lg text-black bg-white border border-blue-500 rounded px-2 py-1"
+            />
+          ) : (
+            <>
+              <h3 className="font-semibold text-lg text-black flex-1 pr-2">{notebook.title}</h3>
+              {!isEditing && (
+                <OverflowMenu
+                  onDelete={handleDeleteNotebook}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+              )}
+            </>
+          )}
+        </div>
         {!isEditing && (
-          <OverflowMenu
-            onDelete={handleDeleteNotebook}
-            className="ml-2"
-          />
+          <div className="flex items-center gap-3 text-sm text-gray-600 mt-2">
+            {folderCount > 0 && (
+              <span className="flex items-center gap-1">
+                <span>📁</span>
+                <span>{folderCount} {folderCount === 1 ? 'folder' : 'folders'}</span>
+              </span>
+            )}
+            {totalNotes > 0 && (
+              <span className="flex items-center gap-1">
+                <span>📄</span>
+                <span>{totalNotes} {totalNotes === 1 ? 'note' : 'notes'}</span>
+              </span>
+            )}
+            {folderCount === 0 && totalNotes === 0 && (
+              <span className="text-gray-400 italic">Empty notebook</span>
+            )}
+          </div>
         )}
       </div>
 

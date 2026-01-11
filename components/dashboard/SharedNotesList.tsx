@@ -29,13 +29,13 @@ export function SharedNotesList() {
           <div 
             key={note._id}
             onClick={() => router.push(`/notes/${note._id}`)}
-            className="bg-white rounded-lg border hover:shadow-md cursor-pointer p-4 transition-all"
+            className="bg-white rounded-lg border hover:shadow-md cursor-pointer p-4 transition-all shadow-sm"
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-semibold text-lg text-black truncate pr-2" title={note.title}>
                 {note.title}
               </h3>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full whitespace-nowrap">
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                 Shared
               </span>
             </div>

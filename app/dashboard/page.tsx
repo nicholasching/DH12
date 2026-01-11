@@ -15,7 +15,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-black">DH12 Notes</h1>
+          <h1 className="text-xl font-bold text-black">Alloy Dashboard</h1>
           <UserButton afterSignOutUrl="/sign-in" />
         </div>
       </header>
