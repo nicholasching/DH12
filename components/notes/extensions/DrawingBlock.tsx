@@ -4,7 +4,7 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { QRCodeGenerator } from "@/components/qr-code/QRCodeGenerator";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 import { useEffect, useState } from "react";
 import { DrawingBoard } from "@/components/drawing/DrawingBoard";
 import { useUser } from "@clerk/nextjs";
@@ -44,24 +44,31 @@ export function DrawingBlock(props: any) {
          </div>
        ) : (
          <div className="relative h-[500px] w-full border-2 border-transparent hover:border-blue-200 transition-colors">
-            {showQR ? (
-               <div className="flex flex-col items-center justify-center h-full bg-gray-50 relative">
+            <div className="w-full h-full relative">
+              <DrawingBoard 
+                drawingId={drawingId} 
+                onSave={() => {}} 
+                onShowQR={() => setShowQR(true)}
+              />
+            </div>
+            {showQR && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center">
+                {/* Translucent gray overlay */}
+                <div 
+                  className="absolute inset-0 bg-gray-900/50"
+                  onClick={() => setShowQR(false)}
+                />
+                {/* QR Code Modal - Centered */}
+                <div className="relative bg-white rounded-lg p-5 max-w-sm mx-auto">
                   <button 
                     onClick={() => setShowQR(false)}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 z-10 text-sm"
                   >
-                    ✕ Close
+                    ✕
                   </button>
                   <QRCodeGenerator drawingId={drawingId} />
-               </div>
-            ) : (
-                <div className="w-full h-full relative">
-                  <DrawingBoard 
-                    drawingId={drawingId} 
-                    onSave={() => {}} 
-                    onShowQR={() => setShowQR(true)}
-                  />
                 </div>
+              </div>
             )}
          </div>
        )}

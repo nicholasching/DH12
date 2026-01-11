@@ -186,7 +186,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
               onChange={(e) => setTitle(e.target.value)}
               onBlur={handleTitleBlur}
               onKeyDown={handleTitleKeyDown}
-              className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 w-full text-gray-900"
+              className="text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-0 w-full text-black"
               placeholder="Untitled Page"
             />
             <div className="h-px bg-gray-300 mt-2" />

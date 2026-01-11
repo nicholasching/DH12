@@ -335,7 +335,6 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
             </Button>
           </div>
 
-          <div className="flex gap-1">
             <Button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
@@ -346,7 +345,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
             <Button
               onClick={addDrawing}
               disabled={!noteId}
-              className= 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100 focus:bg-gray-900 focus:text-gray-100'
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
               variant="secondary"
             >
               + Drawing
@@ -368,7 +367,6 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                 </>
               )}
             </Button>
-          </div>
         </div>
       )}
 
@@ -396,8 +394,13 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                     </>
                   ) : (
                     <>
-                      <Check size={12} />
-                      Insert
+                      <div className="text-black">
+                        <Check size={12} />
+                      </div>
+                      <div className="text-black">
+                        Insert
+                      </div>
+                      
                     </>
                   )}
                 </Button>
@@ -409,10 +412,16 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                   resetTranscript();
                   setFormattedTranscript(null);
                 }}
-                className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
+                className="px-2 py-1 text-xs font-medium text-black bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
               >
-                <X size={12} />
-                Close
+                <div className="text-black">
+                  <X size={12} />
+                </div>
+                <div className="text-black">
+                  Close
+                </div>
+
+                
               </Button>
             </div>
           </div>

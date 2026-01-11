@@ -55,7 +55,7 @@ export function ShareDialog({ noteId }: ShareDialogProps) {
             >
               <X size={20} />
             </button>
-            <h2 className="text-xl font-bold mb-4">Share Note</h2>
+            <h2 className="text-xl font-bold mb-4 text-black">Share Note</h2>
             <form onSubmit={handleShare}>
               <div className="mb-4">
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -68,7 +68,7 @@ export function ShareDialog({ noteId }: ShareDialogProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading || isSuccess}
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   autoFocus
                 />
               </div>

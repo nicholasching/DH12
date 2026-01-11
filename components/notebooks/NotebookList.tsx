@@ -166,7 +166,7 @@ function NotebookCard({ notebook, isExpanded, onToggle }: {
                 value={newFolderTitle}
                 onChange={(e) => setNewFolderTitle(e.target.value)}
                 placeholder="Folder name"
-                className="flex-1 text-sm px-2 py-1 border rounded"
+                className="flex-1 text-sm px-2 py-1 border rounded text-black"
                 onClick={(e) => e.stopPropagation()}
               />
               <Button type="submit" className="text-xs px-2 py-1">Add</Button>
@@ -377,7 +377,7 @@ function NoteLink({ noteId }: { noteId: Id<"notes"> }) {
             }
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 text-xs bg-white border border-blue-500 rounded px-2 py-1"
+          className="flex-1 text-xs bg-white border border-blue-500 rounded px-2 py-1 text-black"
         />
       ) : (
         <>

@@ -34,14 +34,14 @@ export function CreateNotebookModal({ isOpen, onClose }: CreateNotebookModalProp
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
-        <h2 className="text-xl font-bold mb-4">Create Notebook</h2>
+        <h2 className="text-xl font-bold mb-4 text-black">Create Notebook</h2>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Notebook Title"
-            className="w-full px-3 py-2 border rounded-lg mb-4"
+            className="w-full px-3 py-2 border rounded-lg mb-4 text-black"
             autoFocus
           />
           <div className="flex justify-end gap-2">

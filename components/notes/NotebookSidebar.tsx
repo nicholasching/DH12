@@ -206,7 +206,7 @@ export function NotebookSidebar({
                   }
                 }}
                 placeholder="Notebook name"
-                className="flex-1 text-sm px-2 py-1 border border-blue-500 rounded bg-white"
+                className="flex-1 text-sm px-2 py-1 border border-blue-500 rounded bg-white text-black"
               />
             </div>
           ) : (
@@ -261,7 +261,7 @@ export function NotebookSidebar({
                       }
                     }}
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 text-sm font-medium text-gray-900 bg-white border border-blue-500 rounded px-2 py-1"
+                    className="flex-1 text-sm font-medium text-black bg-white border border-blue-500 rounded px-2 py-1"
                   />
                 ) : (
                   <span className="flex-1 text-sm font-medium text-gray-900 truncate">
@@ -310,7 +310,7 @@ export function NotebookSidebar({
                               }
                             }}
                             onClick={(e) => e.stopPropagation()}
-                            className="flex-1 text-sm text-gray-700 bg-white border border-blue-500 rounded px-2 py-1"
+                            className="flex-1 text-sm text-black bg-white border border-blue-500 rounded px-2 py-1"
                           />
                         ) : (
                           <span className="flex-1 text-sm text-gray-700 truncate">
@@ -342,7 +342,7 @@ export function NotebookSidebar({
                               }
                             }}
                             placeholder="Folder name"
-                            className="flex-1 text-sm px-2 py-1 border border-blue-500 rounded bg-white"
+                            className="flex-1 text-sm px-2 py-1 border border-blue-500 rounded bg-white text-black"
                           />
                         </div>
                       ) : (

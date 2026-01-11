@@ -169,7 +169,7 @@ export function FloatingChat({ threadId, noteId, onClose, onThreadDelete }: Floa
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask follow-up..."
-              className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 text-sm border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               disabled={isGenerating}
             />
             <Button 

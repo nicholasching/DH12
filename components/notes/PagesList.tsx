@@ -228,7 +228,7 @@ function PageItem({
             if (e.key === 'Escape') onEditCancel();
           }}
           onClick={(e) => e.stopPropagation()}
-          className="flex-1 text-sm bg-white border border-blue-500 rounded px-2 py-1"
+          className="flex-1 text-sm bg-white border border-blue-500 rounded px-2 py-1 text-black"
         />
       ) : (
         <>
