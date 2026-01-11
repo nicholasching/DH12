@@ -5,12 +5,30 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Button Colors */
+  --button-primary: #f6a23b; /* purple */
+  --button-primary-hover: #58ea33; /* purple-600 */
+  --button-secondary: #e5e7eb; /* gray-200 */
+  --button-secondary-text: #111827; /* gray-900 */
+  --button-secondary-hover: #d1d5db; /* gray-300 */
+  --button-danger: #ef4444; /* red-500 */
+  --button-danger-hover: #dc2626; /* red-600 */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    
+    /* Button Colors - Dark Mode */
+    --button-primary: #620030; 
+    --button-primary-hover: #7A003C;
+    --button-secondary: #495965;
+    --button-secondary-text: #f9fafb;
+    --button-secondary-hover: #36414a;
+    --button-danger: #ef4444;
+    --button-danger-hover: #dc2626;
   }
 }
 
