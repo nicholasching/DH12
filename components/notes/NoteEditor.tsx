@@ -19,6 +19,8 @@ import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { Button } from "../ui/button";
 const lowlight = createLowlight(common);
 
+import { CursorPresence } from "./CursorPresence";
+
 export interface NoteEditorHandle {
   removeThreadMark: (threadId: string) => void;
 }
@@ -426,6 +428,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       )}
 
       <EditorContent editor={editor} />
+      {editor && noteId && <CursorPresence editor={editor} noteId={noteId} />}
     </div>
   );
 });

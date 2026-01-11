@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/nextjs";
 import { NotebookList } from "@/components/notebooks/NotebookList";
 import { useState } from "react";
 import { CreateNotebookModal } from "@/components/dashboard/CreateNotebookModal";
+import { SharedNotesList } from "@/components/dashboard/SharedNotesList";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
@@ -21,6 +22,8 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SharedNotesList />
+        
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-black">Your Notebooks</h2>
           <Button onClick={() => setIsCreateModalOpen(true)}>

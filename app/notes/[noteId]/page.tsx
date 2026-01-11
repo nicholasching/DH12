@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Id } from "convex/values";
+import { Id } from "@/convex/_generated/dataModel";
 import { NoteEditor, NoteEditorHandle } from "@/components/notes/NoteEditor";
 import { TopHeader } from "@/components/notes/TopHeader";
 import { NotebookSidebar } from "@/components/notes/NotebookSidebar";
@@ -128,7 +128,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white relative">
       {/* Top Header */}
-      <TopHeader />
+      <TopHeader noteId={noteId} />
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">

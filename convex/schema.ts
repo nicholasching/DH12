@@ -2,6 +2,15 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: defineTable({
+    tokenIdentifier: v.string(),
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    image: v.optional(v.string()),
+  })
+    .index("by_token", ["tokenIdentifier"])
+    .index("by_email", ["email"]),
+
   notebooks: defineTable({
     userId: v.string(),
     title: v.string(),
@@ -19,6 +28,7 @@ export default defineSchema({
     userId: v.string(),
     title: v.string(),
     content: v.any(), // TipTap JSON content
+    sharedWith: v.optional(v.array(v.string())), // Array of emails
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -65,4 +75,14 @@ export default defineSchema({
     .index("by_note", ["noteId"])
     .index("by_user", ["userId"])
     .index("by_session", ["sessionId"]),
+
+  cursors: defineTable({
+    noteId: v.id("notes"),
+    userId: v.string(),
+    userName: v.optional(v.string()),
+    position: v.any(), // { from: number, to: number } or { x: number, y: number }
+    updatedAt: v.number(),
+  })
+    .index("by_note", ["noteId"])
+    .index("by_user_note", ["userId", "noteId"]),
 });
