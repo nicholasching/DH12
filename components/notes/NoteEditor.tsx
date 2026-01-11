@@ -49,11 +49,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     startListening,
     stopListening,
     resetTranscript,
-  } = useSpeechRecognition({
-    onResult: (newTranscript) => {
-      // Optional: Auto-update transcript display
-    },
-  });
+  } = useSpeechRecognition();
 
   const editor = useEditor({
     extensions: [
@@ -158,74 +154,9 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
   const handleToggleTranscription = () => {
     if (isListening) {
       stopListening();
-      setShowTranscript(false);
-      resetTranscript();
     } else {
-      // Show transcript box immediately for instant UI feedback
       setShowTranscript(true);
-      
-      // Start listening FIRST to ensure state updates immediately
-      // This ensures the button shows "Stop" right away
       startListening();
-      
-      // Handle cursor positioning after starting (non-blocking)
-      if (editor) {
-        // Use requestAnimationFrame to ensure state update happens first
-        requestAnimationFrame(() => {
-          try {
-            const { state } = editor.view;
-            const { selection } = state;
-            const { $from } = selection;
-            const cursorPos = $from.pos;
-            
-            // Get the parent node (paragraph/heading/etc.) and check text around cursor
-            const parent = $from.parent;
-            const parentStart = $from.start($from.depth);
-            const offsetInParent = cursorPos - parentStart;
-            
-            // Get text content of the parent node
-            const parentText = parent.textContent;
-            
-            // Check if cursor is at document boundaries
-            const isAtDocStart = cursorPos === 0;
-            const isAtDocEnd = cursorPos >= state.doc.content.size;
-            
-            // Check characters immediately before and after cursor in the parent node
-            const charBefore = offsetInParent > 0 ? parentText[offsetInParent - 1] : '';
-            const charAfter = offsetInParent < parentText.length ? parentText[offsetInParent] : '';
-            
-            // Check if cursor is at start/end of parent node or on whitespace
-            const isAtParentStart = offsetInParent === 0;
-            const isAtParentEnd = offsetInParent >= parentText.length;
-            const isOnWhitespace = (charBefore === '' || /\s/.test(charBefore)) && 
-                                   (charAfter === '' || /\s/.test(charAfter));
-            
-            // If cursor is on whitespace (or at boundaries), keep cursor there
-            if (isOnWhitespace || isAtParentStart || isAtParentEnd || isAtDocStart || isAtDocEnd) {
-              // Keep cursor where it is - transcription will be inserted here
-              editor.chain().focus().run();
-            } else {
-              // Cursor is on text, move to a new line
-              const docSize = state.doc.content.size;
-              editor.chain()
-                .focus()
-                .setTextSelection(docSize)
-                .run();
-              
-              // Insert a newline if there's existing content
-              if (state.doc.textContent.trim().length > 0) {
-                editor.chain()
-                  .focus()
-                  .insertContent('\n')
-                  .run();
-              }
-            }
-          } catch (err) {
-            // Ignore errors in cursor positioning - transcription is already started
-            console.error("Error positioning cursor:", err);
-          }
-        });
-      }
     }
   };
 

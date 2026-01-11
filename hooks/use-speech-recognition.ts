@@ -2,48 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-// Web Speech API types
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  abort(): void;
-  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
-  onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
-  onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
-}
-
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionResultList {
-  readonly length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionResult {
-  readonly length: number;
-  readonly isFinal: boolean;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
-}
-
-interface SpeechRecognitionAlternative {
-  readonly transcript: string;
-  readonly confidence: number;
-}
-
-interface SpeechRecognitionErrorEvent extends Event {
-  readonly error: string;
-  readonly message: string;
-}
-
 interface UseSpeechRecognitionOptions {
   continuous?: boolean;
   interimResults?: boolean;
@@ -66,9 +24,15 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const finalTranscriptRef = useRef<string>("");
-  const isRestartingRef = useRef<boolean>(false);
-  const shouldStopRef = useRef<boolean>(false);
-  const isListeningRef = useRef<boolean>(false);
+  
+  // Keep callbacks stable
+  const onResultRef = useRef(onResult);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onResultRef.current = onResult;
+    onErrorRef.current = onError;
+  }, [onResult, onError]);
 
   useEffect(() => {
     // Check if browser supports Speech Recognition
@@ -88,22 +52,13 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
     recognition.continuous = continuous;
     recognition.interimResults = interimResults;
     recognition.lang = lang;
-    
-    // Optimize for faster response - reduce silence detection time
-    // Note: maxAlternatives doesn't significantly help with speed, but we keep settings minimal
 
     recognition.onstart = () => {
-      // State already set in startListening for instant feedback
-      isListeningRef.current = true;
+      setIsListening(true);
       setError(null);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      // Ignore results if we've explicitly stopped
-      if (shouldStopRef.current) {
-        return;
-      }
-
       let interimTranscript = "";
       let finalTranscript = "";
 
@@ -124,20 +79,10 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       // Combine accumulated final transcript with current interim results
       const newTranscript = finalTranscriptRef.current + interimTranscript;
       setTranscript(newTranscript);
-      onResult?.(newTranscript);
+      onResultRef.current?.(newTranscript);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      // Ignore "aborted" errors when we're restarting or explicitly stopping
-      if (event.error === "aborted" && (isRestartingRef.current || shouldStopRef.current)) {
-        return;
-      }
-
-      // Ignore "aborted" errors during normal operation (happens during restart)
-      if (event.error === "aborted") {
-        return;
-      }
-
       const errorMessage =
         event.error === "no-speech"
           ? "No speech detected. Please try again."
@@ -147,38 +92,25 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
           ? "Microphone permission denied. Please allow microphone access."
           : `Speech recognition error: ${event.error}`;
 
+      // Only update state if it's a fatal error or we're not continuously listening
+      if (event.error === "not-allowed" || event.error === "audio-capture") {
+        setIsListening(false);
+      }
+      
       setError(errorMessage);
-      setIsListening(false);
-      onError?.(errorMessage);
+      onErrorRef.current?.(errorMessage);
     };
 
     recognition.onend = () => {
-      isListeningRef.current = false;
-      
-      // If we explicitly want to stop, don't auto-restart
-      if (shouldStopRef.current) {
-        shouldStopRef.current = false;
-        setIsListening(false);
-        return;
-      }
-      
-      // If we're restarting, don't update state - the restart will handle it
-      if (!isRestartingRef.current) {
-        setIsListening(false);
-      } else {
-        // Reset the restarting flag after end event
-        isRestartingRef.current = false;
-      }
+      setIsListening(false);
     };
 
     recognitionRef.current = recognition;
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      recognition.stop();
     };
-  }, [continuous, interimResults, lang, onResult, onError]);
+  }, [continuous, interimResults, lang]); // Removed onResult/onError from deps
 
   const startListening = useCallback(() => {
     if (!recognitionRef.current) {
@@ -186,102 +118,32 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
       return;
     }
 
-    // If already listening, stop first and wait before restarting
-    if (isListeningRef.current || isListening) {
-      shouldStopRef.current = false; // Clear stop flag since we're restarting
-      isRestartingRef.current = true;
-      
-      try {
-        if (typeof recognitionRef.current.abort === 'function') {
-          recognitionRef.current.abort();
-        } else {
-          recognitionRef.current.stop();
-        }
-      } catch (err) {
-        // Ignore errors during stop
-      }
-
-      // Wait for recognition to fully end before starting again
-      const restartAfterEnd = () => {
-        let attempts = 0;
-        const maxAttempts = 10; // Max 10 attempts (~160ms)
-        
-        const checkAndRestart = () => {
-          attempts++;
-          if (recognitionRef.current && (!isListeningRef.current || attempts >= maxAttempts)) {
-            shouldStopRef.current = false;
-            isRestartingRef.current = false;
-            finalTranscriptRef.current = "";
-            setTranscript("");
-            setError(null);
-            setIsListening(true);
-            
-            try {
-              recognitionRef.current.start();
-            } catch (startErr) {
-              isListeningRef.current = false;
-              setIsListening(false);
-              setError("Failed to start speech recognition. Please try again.");
-            }
-          } else {
-            // If still listening, check again
-            requestAnimationFrame(checkAndRestart);
-          }
-        };
-        requestAnimationFrame(checkAndRestart);
-      };
-
-      // Give it a moment to properly end
-      setTimeout(restartAfterEnd, 50);
-      return;
-    }
-
-    // Reset flags for new session
-    shouldStopRef.current = false;
-    isRestartingRef.current = false;
-
     // Reset transcript when starting fresh
-    finalTranscriptRef.current = "";
-    setTranscript("");
-    setError(null);
-
-    // Set listening state immediately for instant UI feedback
-    setIsListening(true);
+    if (!isListening) {
+      finalTranscriptRef.current = "";
+      setTranscript("");
+    }
 
     try {
       recognitionRef.current.start();
     } catch (err) {
-      // If it fails to start, reset state
-      isListeningRef.current = false;
-      setIsListening(false);
-      setError("Failed to start speech recognition. Please try again.");
+      // Already started or error
+      if (err instanceof Error && err.message.includes("start")) {
+        // Already started, stop and restart
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          recognitionRef.current?.start();
+        }, 100);
+      }
     }
   }, [isListening]);
 
   const stopListening = useCallback(() => {
-    if (!recognitionRef.current) return;
-    
-    // Mark that we want to stop (prevents auto-restart in continuous mode)
-    shouldStopRef.current = true;
-    isRestartingRef.current = false;
-    isListeningRef.current = false;
-    
-    try {
-      // Use abort() for immediate stop, or stop() if abort isn't available
-      if (typeof recognitionRef.current.abort === 'function') {
-        recognitionRef.current.abort();
-      } else {
-        recognitionRef.current.stop();
-      }
-      // Update state immediately for instant UI feedback
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
       setIsListening(false);
-    } catch (err) {
-      // Even if stop fails, update state
-      isListeningRef.current = false;
-      setIsListening(false);
-      shouldStopRef.current = false;
     }
-  }, []);
+  }, [isListening]);
 
   const resetTranscript = useCallback(() => {
     setTranscript("");
@@ -302,11 +164,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
 // Extend Window interface for TypeScript
 declare global {
   interface Window {
-    SpeechRecognition: {
-      new (): SpeechRecognition;
-    };
-    webkitSpeechRecognition: {
-      new (): SpeechRecognition;
-    };
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
   }
 }
