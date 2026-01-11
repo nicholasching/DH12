@@ -22,8 +22,6 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <SharedNotesList />
-        
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-black">Your Notebooks</h2>
           <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -32,6 +30,8 @@ export default function DashboardPage() {
         </div>
 
         <NotebookList />
+        
+        <SharedNotesList />
       </main>
 
       <CreateNotebookModal

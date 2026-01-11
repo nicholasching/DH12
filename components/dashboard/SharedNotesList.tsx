@@ -22,7 +22,7 @@ export function SharedNotesList() {
   if (sharedNotes.length === 0) return null;
 
   return (
-    <div className="mb-8">
+    <div className="mb-8 mt-8">
       <h2 className="text-2xl font-bold text-black mb-4">Shared with Me</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {sharedNotes.map((note) => (
@@ -35,9 +35,6 @@ export function SharedNotesList() {
               <h3 className="font-semibold text-lg text-black truncate pr-2" title={note.title}>
                 {note.title}
               </h3>
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
-                Shared
-              </span>
             </div>
             
             <div className="text-sm text-gray-500 space-y-1">

@@ -145,6 +145,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
             onFolderSelect={handleFolderSelect}
             isCollapsed={isNotebookCollapsed}
             onToggleCollapse={() => setIsNotebookCollapsed(!isNotebookCollapsed)}
+            currentNoteId={noteId}
           />
           {!isNotebookCollapsed && (
             <div

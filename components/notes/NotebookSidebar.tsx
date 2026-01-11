@@ -16,6 +16,7 @@ interface NotebookSidebarProps {
   onFolderSelect: (notebookId: Id<"notebooks">, folderId: string | null) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  currentNoteId?: Id<"notes"> | null;
 }
 
 export function NotebookSidebar({
@@ -25,12 +26,27 @@ export function NotebookSidebar({
   onFolderSelect,
   isCollapsed,
   onToggleCollapse,
+  currentNoteId,
 }: NotebookSidebarProps) {
   const { user } = useUser();
   const router = useRouter();
+  const email = user?.emailAddresses[0]?.emailAddress;
+  
   const notebooks = useQuery(
     api.notebooks.list,
     user?.id ? { userId: user.id } : "skip"
+  );
+  
+  // Check if current note is shared
+  const currentNote = useQuery(
+    api.notes.get,
+    currentNoteId ? { noteId: currentNoteId } : "skip"
+  );
+  
+  const isNoteShared = currentNote && email && currentNote.sharedWith?.includes(email);
+  const sharedNotebook = useQuery(
+    api.notebooks.get,
+    isNoteShared && currentNote?.notebookId ? { notebookId: currentNote.notebookId } : "skip"
   );
   const addFolder = useMutation(api.notebooks.addFolder);
   const createNotebook = useMutation(api.notebooks.create);
@@ -372,6 +388,97 @@ export function NotebookSidebar({
               No notebooks yet
             </div>
           )}
+
+        {/* Show shared notebook if viewing a shared note */}
+        {isNoteShared && sharedNotebook && (
+          <div className="mt-4 pt-4 border-t border-gray-300">
+            <div className="px-3 mb-2">
+              <span className="text-xs font-semibold text-gray-500 uppercase">Shared Notebooks</span>
+            </div>
+            {(() => {
+              const isExpanded = expandedNotebooks[sharedNotebook._id] ?? false;
+              const isSelected = selectedNotebookId === sharedNotebook._id;
+              const folders = sharedNotebook.structure?.folders || {};
+              
+              return (
+                <div key={sharedNotebook._id} className="mb-2">
+                  <div
+                    className={`
+                      flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors group
+                      ${isSelected ? "bg-blue-100 border border-blue-300" : "hover:bg-blue-50 border border-blue-200"}
+                    `}
+                    onClick={() => {
+                      toggleNotebook(sharedNotebook._id);
+                      if (!isSelected) {
+                        onNotebookSelect(sharedNotebook._id);
+                      }
+                    }}
+                    onDoubleClick={(e) => handleDoubleClick(e, 'notebook', sharedNotebook._id, undefined, sharedNotebook.title)}
+                  >
+                    {isExpanded ? (
+                      <ChevronDown size={16} className="text-blue-600" />
+                    ) : (
+                      <ChevronRight size={16} className="text-blue-600" />
+                    )}
+                    <Folder size={16} className="text-blue-600" />
+                    <span className="flex-1 text-sm font-medium text-gray-900 truncate">
+                      {sharedNotebook.title}
+                    </span>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="ml-6 mt-1 space-y-0.5">
+                      {Object.entries(folders).map(([folderId, folder]: [string, any]) => {
+                        const isFolderSelected =
+                          selectedNotebookId === sharedNotebook._id && selectedFolderId === folderId;
+                        const isEditing = editingId?.type === 'folder' && editingId.notebookId === sharedNotebook._id && editingId.folderId === folderId;
+
+                        return (
+                          <div
+                            key={folderId}
+                            className={`
+                              flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer transition-colors group
+                              ${isFolderSelected ? "bg-blue-100" : "hover:bg-blue-50"}
+                            `}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onFolderSelect(sharedNotebook._id, folderId);
+                            }}
+                            onDoubleClick={(e) => handleDoubleClick(e, 'folder', sharedNotebook._id, folderId, folder.title)}
+                          >
+                            {getFolderIcon(folder.title)}
+                            {isEditing ? (
+                              <input
+                                ref={isEditing ? editInputRef : null}
+                                type="text"
+                                value={editingValue}
+                                onChange={(e) => setEditingValue(e.target.value)}
+                                onBlur={handleRenameSubmit}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleRenameSubmit();
+                                  if (e.key === 'Escape') {
+                                    setEditingId(null);
+                                    setEditingValue("");
+                                  }
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex-1 text-sm text-black bg-white border border-blue-500 rounded px-2 py-1"
+                              />
+                            ) : (
+                              <span className="flex-1 text-sm text-gray-700 truncate">
+                                {folder.title}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        )}
         </div>
       )}
     </div>
