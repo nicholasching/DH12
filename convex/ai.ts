@@ -3,15 +3,23 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
 const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+const groqApiKey = process.env.GROQ_API_KEY;
 
 if (!apiKey) {
   // Warn but don't fail at build time
   console.warn("Missing GOOGLE_GENERATIVE_AI_API_KEY");
 }
 
+if (!groqApiKey) {
+  // Warn but don't fail at build time
+  console.warn("Missing GROQ_API_KEY");
+}
+
 const genAI = new GoogleGenerativeAI(apiKey || "");
+const groq = new Groq({ apiKey: groqApiKey || "" });
 
 export const chat = action({
   args: {
@@ -86,11 +94,9 @@ export const formatTranscript = action({
     previousTranscript: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    if (!apiKey) {
-      throw new Error("Gemini API key not configured");
+    if (!groqApiKey) {
+      throw new Error("Groq API key not configured");
     }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `You are a helpful assistant that formats transcribed speech.
     Correct punctuation, capitalization, and grammar.
@@ -102,11 +108,22 @@ export const formatTranscript = action({
     Current text to format: "${args.transcript}"`;
 
     try {
-      const result = await model.generateContent(prompt);
-      const response = result.response;
-      return response.text();
+      const completion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        model: "openai/gpt-oss-120b",
+        temperature: 0.3,
+        max_tokens: 500,
+      });
+
+      const formatted = completion.choices[0]?.message?.content?.trim();
+      return formatted || args.transcript;
     } catch (error: any) {
-      console.error("Gemini Format Error:", error);
+      console.error("Groq Format Error:", error);
       // Fallback to original text if AI fails
       return args.transcript; 
     }
