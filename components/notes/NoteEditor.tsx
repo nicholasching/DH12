@@ -431,7 +431,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                   {isFormatting ? (
                     <>
                       <span className="w-3 h-3 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
-                      Formatting...
+                      <span className="text-black">Formatting...</span>
                     </>
                   ) : (
                     <>

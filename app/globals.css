@@ -75,6 +75,12 @@ div[data-testid="style-panel"] {
   margin-top: 60px !important;
 }
 
+
+.tlui-layout__bottom {
+  padding-bottom: 5px !important;
+  transform: translateY(-80px) !important;
+}
+
 /* Highlight.js Theme (GitHub Dark) */
 .hljs {
   display: block;
