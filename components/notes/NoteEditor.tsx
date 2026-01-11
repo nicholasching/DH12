@@ -247,35 +247,40 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
               title="Bold (Cmd+B)"
             >
               <strong>B</strong>
             </Button>
             <Button
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('italic') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('italic') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
               title="Italic (Cmd+I)"
             >
               <em>I</em>
             </Button>
             <Button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('underline') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('underline') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
               title="Underline (Cmd+U)"
             >
               <u>U</u>
             </Button>
             <Button
               onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('strike') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('strike') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
               title="Strikethrough"
             >
               <s>S</s> 
             </Button>
             <Button
               onClick={() => editor.chain().focus().toggleHighlight().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1 ${editor.isActive('highlight') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1 ${editor.isActive('highlight') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
               title="Highlight (Cmd+Shift+H)"
             >
               <Highlighter size={14} />
@@ -285,13 +290,15 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-               className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+               className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+               variant="secondary"
             >
               H1
             </Button>
             <Button
                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-               className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+               className={`px-3 py-1.5 rounded text-sm font-bold transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+               variant="secondary"
             >
               H2
             </Button>
@@ -300,24 +307,23 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
           <div className="flex gap-1">
             <Button
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('codeBlock') ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
             >
               Code
             </Button>
             <Button
               onClick={addDrawing}
               disabled={!noteId}
-              className="px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-blue-50 text-blue-700 bg-white border border-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className= 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100 focus:bg-gray-900 focus:text-gray-100'
+              variant="secondary"
             >
               + Drawing
             </Button>
             <Button
               onClick={handleToggleTranscription}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                isListening
-                  ? "bg-red-100 text-red-700 border border-red-300 hover:bg-red-200"
-                  : "bg-white text-gray-700 hover:bg-gray-200 border border-gray-200"
-              }`}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors flex items-center gap-1.5 ${isListening ? 'bg-gray-900 text-gray-100 hover:bg-gray-200 hover:text-gray-900' : 'bg-white text-gray-900 hover:bg-gray-200 border border-gray-200 focus:bg-gray-900 focus:text-gray-100'}`}
+              variant="secondary"
             >
               {isListening ? (
                 <>

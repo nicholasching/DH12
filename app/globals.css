@@ -7,8 +7,8 @@
   --foreground: #171717;
   
   /* Button Colors */
-  --button-primary: #f6a23b; /* purple */
-  --button-primary-hover: #58ea33; /* purple-600 */
+  --button-primary: #7A003C;
+  --button-primary-hover: #953363; /* purple-600 */
   --button-secondary: #e5e7eb; /* gray-200 */
   --button-secondary-text: #111827; /* gray-900 */
   --button-secondary-hover: #d1d5db; /* gray-300 */
