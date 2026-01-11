@@ -30,7 +30,7 @@ export const ThreadMark = Mark.create<ThreadMarkOptions>({
         renderHTML: attributes => {
           return {
             'data-thread-id': attributes.threadId,
-            class: 'bg-yellow-200 cursor-pointer border-b-2 border-yellow-400 hover:bg-yellow-300 transition-colors',
+            class: 'bg-purple-200 cursor-pointer border-b-2 border-purple-400 hover:bg-purple-300 transition-colors',
           }
         },
       },

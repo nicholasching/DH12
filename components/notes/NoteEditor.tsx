@@ -95,7 +95,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       }),
       ThreadMark.configure({
         HTMLAttributes: {
-          class: "bg-yellow-200 border-b-2 border-yellow-400 cursor-pointer",
+          class: "bg-purple-200 border-b-2 border-purple-400 cursor-pointer",
         },
       }),
     ],
@@ -274,6 +274,13 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
 
     // Apply mark
     editor.chain().focus().setThread({ threadId }).run();
+    
+    // Immediately save the content with the thread mark (bypass debounce)
+    // This ensures the thread mark is persisted even if the page reloads quickly
+    const contentWithThread = editor.getJSON();
+    onChange?.(contentWithThread);
+    // Also flush the debounced function to ensure consistency
+    debouncedOnChange.flush();
     
     // Open chat
     onThreadSelect?.(threadId);
