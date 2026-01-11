@@ -60,7 +60,11 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
   }, [note?.title]); 
   
   const handleContentChange = async (content: any) => {
-    await updateNote({ noteId, content });
+    try {
+      await updateNote({ noteId, content });
+    } catch (e) {
+      console.error("Failed to save note:", e);
+    }
   };
 
   const handleTitleBlur = async () => {
