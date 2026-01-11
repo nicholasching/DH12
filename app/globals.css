@@ -77,8 +77,8 @@ div[data-testid="style-panel"] {
 
 
 .tlui-layout__bottom {
-  padding-bottom: 5px !important;
-  transform: translateY(-80px) !important;
+  padding-bottom: 0px !important;
+  transform: translateY(-40px) !important;
 }
 
 /* Highlight.js Theme (GitHub Dark) */
