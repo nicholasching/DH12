@@ -177,7 +177,7 @@ export function NotebookSidebar({
     <div className={`${isCollapsed ? 'w-12' : 'w-full'} bg-gray-100 border-r border-gray-300 h-full flex flex-col transition-all duration-200 relative`}>
       <button
         onClick={onToggleCollapse}
-        className="absolute -right-3 top-4 z-10 w-6 h-6 bg-gray-100 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+        className="absolute -right-3 bottom-4 z-10 w-6 h-6 bg-gray-100 border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {isCollapsed ? (
@@ -188,8 +188,8 @@ export function NotebookSidebar({
       </button>
 
       {!isCollapsed && (
-        <div className="flex-1 overflow-y-auto p-2">
-        <div className="mb-4 px-3">
+        <div className="flex-1 overflow-y-auto p-2 pt-4">
+        <div className="mb-4 px-3 pb-2 ">
           {isAddingNotebook ? (
             <div className="flex gap-1">
               <input
@@ -212,7 +212,7 @@ export function NotebookSidebar({
           ) : (
             <button
             onClick={() => setIsAddingNotebook(true)}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition-colors border-t border-white"
           >
             <Plus size={16} />
             <span>Add Notebook</span>

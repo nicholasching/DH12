@@ -313,7 +313,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       )}
 
       {editor && (
-        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center p-2 rounded-t-lg shadow-sm w-full">
+        <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-300 pb-2 sticky top-0 bg-gray-50 z-10 items-center justify-center p-2 shadow-sm" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
           <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
             <Button
               onClick={() => editor.chain().focus().toggleBold().run()}

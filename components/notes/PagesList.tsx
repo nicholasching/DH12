@@ -97,7 +97,7 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
 
   if (!notebookId || !folderId) {
     return (
-      <div className={`${isCollapsed ? 'w-12' : 'w-full'} bg-white border-r border-gray-300 h-full flex items-center justify-center transition-all duration-200`}>
+      <div className={`${isCollapsed ? 'w-0' : 'w-full border-r border-gray-300'} bg-white h-full flex items-center justify-center transition-all duration-200`}>
         {!isCollapsed && (
           <div className="text-sm text-gray-500 text-center px-4">
             Select a folder to view pages
@@ -108,10 +108,10 @@ export function PagesList({ notebookId, folderId, activeNoteId, isCollapsed, onT
   }
 
   return (
-    <div className={`${isCollapsed ? 'w-12' : 'w-full'} bg-white border-r border-gray-300 h-full flex flex-col transition-all duration-200 relative`}>
+    <div className={`${isCollapsed ? 'w-0' : 'w-full border-r border-gray-300 '} bg-white h-full flex flex-col transition-all duration-200 relative`}>
       <button
         onClick={onToggleCollapse}
-        className="absolute -right-3 top-4 z-10 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+        className="absolute -right-3 bottom-4 z-10 w-6 h-6 bg-white border border-gray-300 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
         aria-label={isCollapsed ? "Expand pages list" : "Collapse pages list"}
       >
         {isCollapsed ? (

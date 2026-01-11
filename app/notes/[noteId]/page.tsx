@@ -156,7 +156,7 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
         </div>
 
         {/* Middle Column - Pages List */}
-        <div style={{ width: isPagesCollapsed ? 48 : pagesWidth }} className="relative">
+        <div style={{ width: isPagesCollapsed ? 0 : pagesWidth }} className="relative">
           <PagesList
             notebookId={selectedNotebookId}
             folderId={selectedFolderId}
@@ -196,8 +196,8 @@ export default function NotePage({ params }: { params: Promise<{ noteId: string 
             <div className="h-px bg-gray-300 mt-2" />
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            <div className="w-full max-w-5xl mx-auto py-8 px-8 min-h-full">
+          <div className="flex-1 overflow-y-auto relative">
+            <div className="w-full max-w-5xl mx-auto pb-8 px-8 min-h-full">
               <NoteEditor 
                 ref={editorRef}
                 initialContent={note.content} 
