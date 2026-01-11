@@ -3,8 +3,8 @@
 import { useEditor, EditorContent, ReactNodeViewRenderer, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import { forwardRef, useImperativeHandle, useState } from "react";
-import { Id } from "convex/values";
+import { forwardRef, useImperativeHandle, useState, useEffect, useCallback } from "react";
+import { Id } from "@/convex/_generated/dataModel";
 import { DrawingNode } from "./extensions/DrawingNode";
 import { ThreadMark } from "./extensions/ThreadMark";
 import { Highlight } from "./extensions/Highlight";
@@ -13,7 +13,7 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { common, createLowlight } from "lowlight";
 import { CodeBlockComponent } from "./extensions/CodeBlockComponent";
 import { Sparkles, Mic, MicOff, Check, X, Highlighter } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { Button } from "../ui/button";
@@ -50,6 +50,10 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     stopListening,
     resetTranscript,
   } = useSpeechRecognition();
+
+  const formatTranscript = useAction(api.ai.formatTranscript);
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [formattedTranscript, setFormattedTranscript] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -99,6 +103,89 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       },
     },
   });
+
+  const handleFormatTranscript = useCallback(async (): Promise<string | null> => {
+    if (!transcript.trim() || isFormatting) return null;
+    
+    setIsFormatting(true);
+    try {
+      // Get the last paragraph as context
+      const previousText = editor?.state.doc.textBetween(
+        Math.max(0, (editor?.state.selection.from || 0) - 500),
+        editor?.state.selection.from || 0,
+        " "
+      ) || "";
+
+      const formatted = await formatTranscript({
+        transcript,
+        previousTranscript: previousText,
+      });
+
+      if (formatted) {
+        setFormattedTranscript(formatted);
+        return formatted;
+      } else {
+        setFormattedTranscript(null);
+        return null;
+      }
+    } catch (err) {
+      console.error("Failed to format transcript:", err);
+      setFormattedTranscript(null);
+      return null;
+    } finally {
+      setIsFormatting(false);
+    }
+  }, [editor, transcript, formatTranscript, isFormatting]);
+
+  const handleInsertTranscript = useCallback(() => {
+    if (!editor) return;
+    
+    // Stop listening if currently active
+    if (isListening) {
+      stopListening();
+    }
+    
+    // Insert formatted transcript if available, otherwise raw transcript
+    const textToInsert = formattedTranscript || transcript;
+    
+    if (textToInsert.trim()) {
+      editor.chain().focus().insertContent(textToInsert + " ").run();
+      resetTranscript();
+      setFormattedTranscript(null);
+      setShowTranscript(false);
+    }
+  }, [editor, formattedTranscript, transcript, resetTranscript, isListening, stopListening]);
+
+  // Hotkey handler for Ctrl+Enter
+  useEffect(() => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
+      if (showTranscript && (transcript || isListening) && e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        if (isListening) {
+          stopListening();
+        }
+        // Format first, then insert when complete
+        if (transcript.trim()) {
+          const formatted = await handleFormatTranscript();
+          // Insert the formatted text (or raw if formatting failed)
+          if (formatted && editor) {
+            editor.chain().focus().insertContent(formatted + " ").run();
+            resetTranscript();
+            setFormattedTranscript(null);
+            setShowTranscript(false);
+          } else if (editor) {
+            editor.chain().focus().insertContent(transcript + " ").run();
+            resetTranscript();
+            setFormattedTranscript(null);
+            setShowTranscript(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showTranscript, transcript, isListening, stopListening, handleFormatTranscript, editor, resetTranscript]);
 
   useImperativeHandle(ref, () => ({
     removeThreadMark: (threadId: string) => {
@@ -151,20 +238,21 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
     onThreadSelect?.(threadId);
   };
 
-  const handleToggleTranscription = () => {
+  const handleToggleTranscription = async () => {
     if (isListening) {
       stopListening();
+      // If there's transcript, format it (but don't insert)
+      if (transcript.trim()) {
+        // Small delay to ensure stopListening completes
+        setTimeout(() => {
+          handleFormatTranscript();
+        }, 100);
+      }
     } else {
+      setFormattedTranscript(null);
       setShowTranscript(true);
       startListening();
     }
-  };
-
-  const handleInsertTranscript = () => {
-    if (!editor || !transcript.trim()) return;
-    editor.chain().focus().insertContent(transcript).run();
-    resetTranscript();
-    setShowTranscript(false);
   };
 
   return (
@@ -296,10 +384,20 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
               {transcript && (
                 <Button
                   onClick={handleInsertTranscript}
-                  className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors flex items-center gap-1"
+                  disabled={isFormatting}
+                  className="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors flex items-center gap-1 disabled:opacity-50"
                 >
-                  <Check size={12} />
-                  Insert
+                  {isFormatting ? (
+                    <>
+                      <span className="w-3 h-3 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></span>
+                      Formatting...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={12} />
+                      Insert
+                    </>
+                  )}
                 </Button>
               )}
               <Button
@@ -307,6 +405,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
                   stopListening();
                   setShowTranscript(false);
                   resetTranscript();
+                  setFormattedTranscript(null);
                 }}
                 className="px-2 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors flex items-center gap-1"
               >
@@ -321,7 +420,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
             </div>
           )}
           <div className="text-sm text-gray-800 whitespace-pre-wrap min-h-[60px] max-h-[200px] overflow-y-auto">
-            {transcript || (isListening ? "Listening for speech..." : "No transcript yet")}
+            {formattedTranscript || transcript || (isListening ? "Listening for speech..." : "No transcript yet")}
           </div>
         </div>
       )}

@@ -71,11 +71,44 @@ export const chat = action({
       const result = await chat.sendMessage(lastMessage.content);
       const response = result.response;
       const text = response.text();
-
+    
       return text;
     } catch (error: any) {
       console.error("Gemini API Error:", error);
       throw new Error(`Gemini Error: ${error.message || "Unknown error"}`);
+    }
+  },
+});
+
+export const formatTranscript = action({
+  args: {
+    transcript: v.string(),
+    previousTranscript: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    if (!apiKey) {
+      throw new Error("Gemini API key not configured");
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+
+    const prompt = `You are a helpful assistant that formats transcribed speech.
+    Correct punctuation, capitalization, and grammar.
+    Do not change the meaning.
+    Do not add conversational filler.
+    Return ONLY the formatted text.
+    
+    Context (previous sentence): "${args.previousTranscript || ''}"
+    Current text to format: "${args.transcript}"`;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const response = result.response;
+      return response.text();
+    } catch (error: any) {
+      console.error("Gemini Format Error:", error);
+      // Fallback to original text if AI fails
+      return args.transcript; 
     }
   },
 });
