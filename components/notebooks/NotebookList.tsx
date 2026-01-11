@@ -8,7 +8,6 @@ import { useState, useRef, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { OverflowMenu } from "@/components/ui/OverflowMenu";
-import { Button } from "@/components/ui/button";
 
 export function NotebookList() {
   const { user } = useUser();
