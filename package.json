@@ -22,6 +22,7 @@
     "@clerk/nextjs": "^6.36.7",
     "@google/generative-ai": "^0.24.1",
     "@tiptap/extension-code-block-lowlight": "^2.27.2",
+    "@tiptap/extension-underline": "^2.27.2",
     "@tiptap/react": "^2.1.0",
     "@tiptap/starter-kit": "^2.1.0",
     "assemblyai": "^4.0.0",

@@ -2,6 +2,7 @@
 
 import { useEditor, EditorContent, ReactNodeViewRenderer, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
 import { forwardRef, useImperativeHandle, useState } from "react";
 import { Id } from "convex/values";
 import { DrawingNode } from "./extensions/DrawingNode";
@@ -59,6 +60,7 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
       StarterKit.configure({
         codeBlock: false,
       }),
+      Underline,
       CodeBlockLowlight.configure({
         lowlight,
       }).extend({
@@ -248,21 +250,28 @@ export const NoteEditor = forwardRef<NoteEditorHandle, NoteEditorProps>(({
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('bold') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Bold (Cmd+B)"
             >
-              B
+            <strong>B</strong>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('italic') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Italic (Cmd+I)"
             >
-              I
+              <em>I</em>
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('underline') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
+              title="Underline (Cmd+U)"
+            >
+              <u>U</u>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${editor.isActive('strike') ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'}`}
               title="Strikethrough"
             >
-              S
+              <s>S</s>
             </button>
             <button
               onClick={() => editor.chain().focus().toggleHighlight().run()}
